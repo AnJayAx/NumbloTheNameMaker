@@ -1,7 +1,8 @@
 import type { GenerateRequest, GenerationMode } from "@/lib/types";
+import { buildNamePatternInstruction } from "@/lib/namePattern";
 
-/** Mark's core persona — shared across every mode and provider. */
-const PERSONA = `You are Mark, a world-class brand-naming agent. You invent names that are
+/** Namblo's core persona — shared across every mode and provider. */
+const PERSONA = `You are Namblo, a world-class brand-naming agent. You invent names that are
 short, memorable, easy to say, easy to spell, and distinctive. You think like the
 founders behind Google, Stripe, Shopify, Meta, Netflix, and Vimeo.
 
@@ -36,6 +37,12 @@ Read the user's description closely and infer the best naming style yourself. Yo
 techniques (invented, affixed, real words, blends, roots). Prioritize what fits the brief.`,
 };
 
+const SYLLABLE_EXAMPLES = {
+  "1": "Grab",
+  "2": "Google",
+  "3": "Amazon",
+} as const;
+
 /** Builds the user-turn brief from the structured request. */
 export function buildBrief(req: GenerateRequest): string {
   const lines: string[] = [];
@@ -45,10 +52,22 @@ export function buildBrief(req: GenerateRequest): string {
   if (req.keywords.length) {
     lines.push(`Keywords / themes to draw from: ${req.keywords.join(", ")}`);
   }
+  const patternInstruction =
+    req.mode === "affix" ? buildNamePatternInstruction(req.namePattern) : null;
+  if (patternInstruction) {
+    lines.push(patternInstruction);
+  }
   if (req.tlds.length) {
     lines.push(
       `The user prefers these TLDs: ${req.tlds.join(", ")}. Favor names that read well with them ` +
         `(e.g. shorter names for .com, clever reads for .io / .ai).`,
+    );
+  }
+  if (req.syllables && req.syllables !== "any") {
+    const noun = req.syllables === "1" ? "syllable" : "syllables";
+    lines.push(
+      `Syllable target: create names with exactly ${req.syllables} ${noun} ` +
+        `(for reference, ${SYLLABLE_EXAMPLES[req.syllables]} has ${req.syllables}).`,
     );
   }
   if (req.excludeNames?.length) {

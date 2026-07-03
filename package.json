@@ -1,8 +1,8 @@
 {
-  "name": "mark-the-name-maker",
+  "name": "namblo-the-name-maker",
   "version": "0.1.0",
   "private": true,
-  "description": "Mark — an AI agent that invents creative business names and checks domain availability.",
+  "description": "Namblo — an AI agent that invents creative business names and checks domain availability.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -11,12 +11,16 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.69.0",
+    "@supabase/supabase-js": "^2.110.0",
+    "canvas-confetti": "^1.9.4",
     "next": "^15.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "stripe": "^22.3.0",
     "zod": "^3.25.0"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

@@ -27,10 +27,10 @@ export default function TldPicker({ selected, onChange }: Props) {
             onClick={() => toggle(tld)}
             aria-pressed={active}
             className={[
-              "rounded-full border px-3 py-1 font-mono text-sm transition-all",
+              "rounded-full border px-3.5 py-1.5 font-mono text-sm transition",
               active
-                ? "border-neon-magenta/50 bg-neon-magenta/10 text-white shadow-led-magenta"
-                : "border-white/10 bg-white/[0.02] text-white/55 hover:border-white/25",
+                ? "border-neon-magenta/50 bg-neon-magenta/[0.12] text-white shadow-led-magenta"
+                : "border-white/10 bg-white/[0.02] text-white/55 hover:border-white/25 hover:text-white/80",
             ].join(" ")}
           >
             {tld}

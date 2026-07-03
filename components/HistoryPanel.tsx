@@ -1,102 +1,109 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Modal from "@/components/Modal";
+import { FilterBar } from "@/components/SavedPanel";
 import type { GeneratedNameHistoryEntry } from "@/lib/useGeneratedHistory";
 
 interface Props {
+  open: boolean;
   history: GeneratedNameHistoryEntry[];
   isSaved: (name: string) => boolean;
+  onOpenChange: (open: boolean) => void;
   onSave: (item: GeneratedNameHistoryEntry) => void;
   onClear: () => void;
 }
 
-export default function HistoryPanel({ history, isSaved, onSave, onClear }: Props) {
-  const [open, setOpen] = useState(false);
-  const ordered = useMemo(() => [...history].reverse(), [history]);
+type SortKey = "newest" | "oldest" | "az";
+type Availability = "all" | "available" | "taken";
+
+const hasAvailable = (item: GeneratedNameHistoryEntry) => item.domains.some((d) => d.available);
+const isChecked = (item: GeneratedNameHistoryEntry) => item.domains.length > 0;
+
+export default function HistoryPanel({
+  open,
+  history,
+  isSaved,
+  onOpenChange,
+  onSave,
+  onClear,
+}: Props) {
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortKey>("newest");
+  const [availability, setAvailability] = useState<Availability>("all");
+
+  const visible = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    const filtered = history.filter((item) => {
+      if (needle && !item.name.toLowerCase().includes(needle)) return false;
+      if (availability === "available") return hasAvailable(item);
+      if (availability === "taken") return isChecked(item) && !hasAvailable(item);
+      return true;
+    });
+
+    const sorted = [...filtered];
+    if (sort === "newest") sorted.sort((a, b) => b.generatedAt - a.generatedAt);
+    else if (sort === "oldest") sorted.sort((a, b) => a.generatedAt - b.generatedAt);
+    else sorted.sort((a, b) => a.name.localeCompare(b.name));
+    return sorted;
+  }, [history, query, sort, availability]);
+
+  const footer =
+    history.length > 0 ? (
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-white/40">
+          {visible.length} of {history.length} shown
+        </span>
+        <button
+          type="button"
+          onClick={onClear}
+          className="text-xs text-white/40 transition hover:text-red-300"
+        >
+          Clear all
+        </button>
+      </div>
+    ) : undefined;
 
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="fixed right-4 top-16 z-40 inline-flex items-center gap-2 rounded-full border border-white/10 bg-ink-700/80 px-4 py-2 text-sm text-white/80 shadow-led-soft backdrop-blur-xl transition hover:border-neon-cyan/40 hover:text-white"
-      >
-        <span className="font-mono text-neon-cyan">H</span>
-        History
-        {history.length > 0 && (
-          <span className="rounded-full bg-neon-cyan/15 px-2 py-0.5 text-xs font-semibold text-neon-cyan">
-            {history.length}
-          </span>
-        )}
-      </button>
-
-      <div
-        className={[
-          "fixed inset-0 z-50 transition",
-          open ? "pointer-events-auto" : "pointer-events-none",
-        ].join(" ")}
-        aria-hidden={!open}
-      >
-        <div
-          onClick={() => setOpen(false)}
-          className={[
-            "absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity",
-            open ? "opacity-100" : "opacity-0",
-          ].join(" ")}
+    <Modal
+      open={open}
+      onClose={() => onOpenChange(false)}
+      title={
+        <span>
+          History <span className="text-white/40">({history.length})</span>
+        </span>
+      }
+      ariaLabel="Generated name history"
+      footer={footer}
+    >
+      {history.length > 0 && (
+        <FilterBar
+          query={query}
+          onQuery={setQuery}
+          sort={sort}
+          onSort={setSort}
+          availability={availability}
+          onAvailability={setAvailability}
         />
-        <aside
-          role="dialog"
-          aria-label="Generated name history"
-          className={[
-            "absolute right-0 top-0 flex h-full w-full max-w-md flex-col border-l border-white/10 bg-ink-800/95 backdrop-blur-xl transition-transform duration-300",
-            open ? "translate-x-0" : "translate-x-full",
-          ].join(" ")}
-        >
-          <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-            <h2 className="text-lg font-semibold">
-              History <span className="text-white/40">({history.length})</span>
-            </h2>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Close"
-              className="rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1 text-sm text-white/60 transition hover:text-white"
-            >
-              x
-            </button>
-          </div>
+      )}
 
-          <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
-            {ordered.length === 0 ? (
-              <p className="mt-10 text-center text-sm text-white/40">
-                No generated names yet.
-              </p>
-            ) : (
-              ordered.map((item) => (
-                <HistoryRow
-                  key={`${item.key}-${item.generatedAt}`}
-                  item={item}
-                  saved={isSaved(item.name)}
-                  onSave={onSave}
-                />
-              ))
-            )}
-          </div>
-
-          {history.length > 0 && (
-            <div className="border-t border-white/10 px-5 py-3">
-              <button
-                type="button"
-                onClick={onClear}
-                className="text-xs text-white/40 transition hover:text-red-300"
-              >
-                Clear all
-              </button>
-            </div>
-          )}
-        </aside>
+      <div className="space-y-3">
+        {history.length === 0 ? (
+          <p className="mt-6 text-center text-sm text-white/40">No generated names yet.</p>
+        ) : visible.length === 0 ? (
+          <p className="mt-6 text-center text-sm text-white/40">No names match your filters.</p>
+        ) : (
+          visible.map((item) => (
+            <HistoryRow
+              key={`${item.key}-${item.generatedAt}`}
+              item={item}
+              saved={isSaved(item.name)}
+              onSave={onSave}
+            />
+          ))
+        )}
       </div>
-    </>
+    </Modal>
   );
 }
 
@@ -128,8 +135,8 @@ function HistoryRow({
       className={[
         "glass led-ring relative w-full p-4 text-left transition",
         saved
-          ? "border-amber-300/40 bg-amber-300/[0.06] shadow-[0_0_18px_-8px_rgba(252,211,77,0.85)]"
-          : "hover:border-amber-300/35 hover:bg-white/[0.05]",
+          ? "border-white/25 bg-white/[0.06]"
+          : "hover:border-white/20 hover:bg-white/[0.04]",
       ].join(" ")}
     >
       <button
@@ -202,9 +209,7 @@ function HistoryRow({
           ))}
         </div>
       ) : (
-        <p className="pointer-events-none relative mt-3 text-xs text-white/30">
-          Not checked yet
-        </p>
+        <p className="pointer-events-none relative mt-3 text-xs text-white/30">Not checked yet</p>
       )}
 
       {checkedAndTaken && (

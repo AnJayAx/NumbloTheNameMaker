@@ -10,6 +10,7 @@ export type GenerationMode =
   | "freeform";
 
 export type LlmProvider = "claude" | "openai" | "gemini";
+export type SyllablePreference = "any" | "1" | "2" | "3";
 
 export interface ModeMeta {
   id: GenerationMode;
@@ -53,7 +54,7 @@ export const MODES: ModeMeta[] = [
   {
     id: "freeform",
     label: "Freeform",
-    blurb: "Describe exactly what you want — Mark figures out the style.",
+    blurb: "Describe exactly what you want — Namblo figures out the style.",
     examples: ["“calm, one-syllable, for a meditation app”"],
   },
 ];
@@ -71,8 +72,11 @@ export interface GenerateRequest {
   mode: GenerationMode;
   description: string;
   keywords: string[];
+  /** Affix-only pattern like "pipe-", "-pipe", or "pi-pe" to constrain generated names. */
+  namePattern?: string;
   tlds: string[];
   count: number;
+  syllables?: SyllablePreference;
   excludeNames?: string[];
   provider?: LlmProvider;
   model?: string;

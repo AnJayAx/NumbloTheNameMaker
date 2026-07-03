@@ -46,14 +46,14 @@ export default function ResultCard({
 
   return (
     <div
-      className="glass led-ring animate-fade-up p-5"
-      style={{ animationDelay: `${Math.min(index, 12) * 40}ms` }}
+      className="glass card-hover animate-fade-up p-5"
+      style={{ animationDelay: `${Math.min(index, 12) * 45}ms` }}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="truncate text-2xl font-bold tracking-tight text-white">{idea.name}</h3>
+          <h3 className="truncate text-2xl font-black tracking-tight text-white">{idea.name}</h3>
           {idea.style && (
-            <span className="mt-1 inline-block rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] uppercase tracking-wide text-white/50">
+            <span className="mt-1.5 inline-block rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] uppercase tracking-wide text-white/50">
               {idea.style}
             </span>
           )}
@@ -68,8 +68,8 @@ export default function ResultCard({
             className={[
               "rounded-lg border px-2 py-1 text-sm transition",
               saved
-                ? "border-amber-300/50 bg-amber-300/10 text-amber-300 shadow-[0_0_14px_-4px_rgba(252,211,77,0.7)]"
-                : "border-white/10 bg-white/[0.03] text-white/45 hover:border-amber-300/40 hover:text-amber-200",
+                ? "border-white/30 bg-white/[0.08] text-white"
+                : "border-white/10 bg-white/[0.03] text-white/45 hover:border-white/25 hover:text-white",
             ].join(" ")}
           >
             <StarIcon filled={saved} />
@@ -127,8 +127,8 @@ function Pill({
 
   if (result.available) {
     return (
-      <span className="pill border border-neon-lime/40 bg-neon-lime/10 text-neon-lime shadow-[0_0_14px_-3px_rgba(163,230,53,0.6)]">
-        <span className="h-1.5 w-1.5 rounded-full bg-neon-lime" />
+      <span className="pill border border-white/25 bg-white/[0.07] text-white">
+        <span className="h-1.5 w-1.5 rounded-full bg-white" />
         {tld}
         {result.premium && <span className="text-amber-300">★</span>}
         {result.price !== undefined && (

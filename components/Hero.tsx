@@ -1,18 +1,35 @@
-/** Top-of-page intro for Mark. */
-export default function Hero() {
+interface Props {
+  /** Which product the landing page is presenting. */
+  product?: "namblo" | "nambly";
+}
+
+const COPY = {
+  namblo: {
+    name: "Namblo",
+    tail: "the name maker.",
+    blurb:
+      "Describe your idea, pick a naming style, and Namblo invents a batch of brandable names — then checks every one against your favourite domains in real time.",
+  },
+  nambly: {
+    name: "Nambly",
+    tail: "the name checker.",
+    blurb:
+      "Already have names in mind? Paste them in and Nambly checks each one against your preferred domains in real time, so you know exactly what's still open.",
+  },
+} as const;
+
+/** Top-of-page intro that adapts to the selected product. */
+export default function Hero({ product = "namblo" }: Props) {
+  const copy = COPY[product];
+
   return (
-    <header className="mx-auto max-w-3xl text-center">
-      <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-xs text-white/60 shadow-led-soft">
-        <span className="h-1.5 w-1.5 animate-pulse-glow rounded-full bg-neon-cyan" />
-        AI naming agent · live domain checks
-      </div>
-      <h1 className="text-balance text-5xl font-bold tracking-tight sm:text-6xl">
-        Meet <span className="neon-text">Mark</span>,
-        <br className="hidden sm:block" /> the name maker.
+    <header className="mx-auto max-w-md animate-fade-up text-center">
+      <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+        <span className="neon-text">{copy.name}</span>
       </h1>
-      <p className="mx-auto mt-5 max-w-xl text-pretty text-base text-white/60 sm:text-lg">
-        Describe your idea and pick a naming style. Mark invents a batch of brandable
-        names, then checks each one against your preferred domains in real time.
+      <p className="mt-2 text-sm font-medium text-white/45">{copy.tail}</p>
+      <p className="mx-auto mt-4 max-w-sm text-pretty text-sm leading-relaxed text-white/55">
+        {copy.blurb}
       </p>
     </header>
   );

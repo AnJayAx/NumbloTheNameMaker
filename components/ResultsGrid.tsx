@@ -9,6 +9,7 @@ interface Props {
   results: Record<string, DomainResult>;
   checking: boolean;
   provider?: string;
+  noun?: string;
   isSaved: (name: string) => boolean;
   onToggleSave: (idea: NameIdea, domains: DomainResult[]) => void;
 }
@@ -19,6 +20,7 @@ export default function ResultsGrid({
   results,
   checking,
   provider,
+  noun = "ideas",
   isSaved,
   onToggleSave,
 }: Props) {
@@ -30,14 +32,20 @@ export default function ResultsGrid({
   ).length;
 
   return (
-    <section>
+    <section className="animate-fade-up">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-white/50">
-          {ideas.length} ideas
-          {checking ? " · checking domains…" : availableCount ? ` · ${availableCount} with an open domain` : ""}
+        <h2 className="eyebrow">
+          {ideas.length} {noun}
+          {checking
+            ? " · checking domains…"
+            : availableCount
+              ? ` · ${availableCount} with an open domain`
+              : ""}
         </h2>
         {provider && (
-          <span className="font-mono text-[11px] text-white/30">via {provider}</span>
+          <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 font-mono text-[11px] text-white/40">
+            via {provider}
+          </span>
         )}
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

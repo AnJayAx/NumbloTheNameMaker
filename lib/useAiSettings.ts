@@ -9,25 +9,18 @@ import {
 } from "@/lib/llm/models";
 import type { LlmProvider } from "@/lib/types";
 
-export type AccountTier = "guest" | "signed-in" | "paid";
+export { FREE_LIMITS } from "@/lib/limits";
+export type { AccountTier } from "@/lib/limits";
 
 export interface AiSettings {
-  accountTier: AccountTier;
   provider: LlmProvider;
   modelByProvider: Record<LlmProvider, string>;
   apiKeys: Record<LlmProvider, string>;
 }
 
-const STORAGE_KEY = "mark.ai-settings.v1";
-
-export const FREE_LIMITS: Record<AccountTier, number> = {
-  guest: 10,
-  "signed-in": 30,
-  paid: 100,
-};
+const STORAGE_KEY = "namblo.ai-settings.v1";
 
 const DEFAULT_SETTINGS: AiSettings = {
-  accountTier: "guest",
   provider: DEFAULT_PROVIDER,
   modelByProvider: {
     claude: getDefaultModel("claude"),
@@ -71,10 +64,6 @@ export function useAiSettings() {
   const selectedModel = settings.modelByProvider[settings.provider] || getDefaultModel(settings.provider);
   const selectedApiKey = settings.apiKeys[settings.provider]?.trim() ?? "";
 
-  const setAccountTier = useCallback((accountTier: AccountTier) => {
-    setSettings((prev) => ({ ...prev, accountTier }));
-  }, []);
-
   const setProvider = useCallback((provider: LlmProvider) => {
     setSettings((prev) => ({ ...prev, provider }));
   }, []);
@@ -103,7 +92,6 @@ export function useAiSettings() {
     selectedProvider,
     selectedModel,
     selectedApiKey,
-    setAccountTier,
     setProvider,
     setModel,
     setApiKey,
@@ -115,10 +103,8 @@ function normalizeSettings(value: unknown): AiSettings {
   if (!value || typeof value !== "object") return DEFAULT_SETTINGS;
   const partial = value as Partial<AiSettings>;
   const provider = isProvider(partial.provider) ? partial.provider : DEFAULT_PROVIDER;
-  const accountTier = isAccountTier(partial.accountTier) ? partial.accountTier : "guest";
 
   return {
-    accountTier,
     provider,
     modelByProvider: normalizeModels(partial.modelByProvider),
     apiKeys: normalizeApiKeys(partial.apiKeys),
@@ -145,8 +131,4 @@ function normalizeApiKeys(value: unknown): Record<LlmProvider, string> {
 
 function isProvider(value: unknown): value is LlmProvider {
   return MODEL_PROVIDERS.some((provider: ProviderOption) => provider.id === value);
-}
-
-function isAccountTier(value: unknown): value is AccountTier {
-  return value === "guest" || value === "signed-in" || value === "paid";
 }

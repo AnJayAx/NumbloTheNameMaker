@@ -5,8 +5,9 @@ import { getDomainChecker } from "@/lib/domains/provider";
 export const runtime = "nodejs";
 
 const BodySchema = z.object({
-  // up to 15 names x 10 TLDs
+  // Up to 150 fully-built domains per request. Large manual checks are chunked client-side.
   domains: z.array(z.string().min(3).max(80)).min(1).max(150),
+  provider: z.enum(["rdap", "namecheap", "porkbun", "mock"]).optional(),
 });
 
 export async function POST(request: Request) {
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const checker = await getDomainChecker();
+    const checker = await getDomainChecker(parsed.data.provider);
     const results = await checker.check(domains);
     return NextResponse.json({ results, provider: checker.id });
   } catch (err: unknown) {

@@ -141,3 +141,12 @@ export function getDefaultModel(provider: LlmProvider): string {
 export function isKnownModel(provider: LlmProvider, model: string): boolean {
   return getProviderOption(provider).models.some((option) => option.id === model);
 }
+
+/** Cost band of a model (defaults to "low" for unknown/unset). */
+export function getModelCost(
+  provider: LlmProvider | undefined,
+  model: string | undefined,
+): ModelOption["cost"] {
+  if (!provider || !model) return "low";
+  return getProviderOption(provider).models.find((option) => option.id === model)?.cost ?? "low";
+}

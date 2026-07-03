@@ -1,212 +1,187 @@
 "use client";
 
 import { useState } from "react";
-import { FREE_LIMITS, type AccountTier } from "@/lib/useAiSettings";
+import Link from "next/link";
+import Modal from "@/components/Modal";
+import { PLAN_TIERS, TIER_META, type AccountTier } from "@/lib/limits";
 import { MODEL_PROVIDERS } from "@/lib/llm/models";
 import type { LlmProvider } from "@/lib/types";
 
 interface Props {
-  accountTier: AccountTier;
-  provider: LlmProvider;
-  model: string;
+  open: boolean;
+  tier: AccountTier;
+  authenticated: boolean;
   apiKeys: Record<LlmProvider, string>;
-  historyCount: number;
-  generatedToday: number;
-  onAccountTierChange: (tier: AccountTier) => void;
-  onProviderChange: (provider: LlmProvider) => void;
-  onModelChange: (provider: LlmProvider, model: string) => void;
+  freeUsedToday: number;
+  freeLimit: number;
+  onOpenChange: (open: boolean) => void;
   onApiKeyChange: (provider: LlmProvider, apiKey: string) => void;
   onClearApiKeys: () => void;
 }
 
-const TIERS: Array<{ id: AccountTier; label: string; detail: string }> = [
-  { id: "guest", label: "Guest", detail: "10 free names" },
-  { id: "signed-in", label: "Logged in", detail: "30 free names" },
-  { id: "paid", label: "Paid", detail: "100 names daily" },
+type Tab = "keys" | "billing";
+
+const TABS: Array<{ id: Tab; label: string }> = [
+  { id: "keys", label: "API Keys" },
+  { id: "billing", label: "Billing" },
 ];
 
 export default function SettingsPanel({
-  accountTier,
-  provider,
-  model,
+  open,
+  tier,
+  authenticated,
   apiKeys,
-  historyCount,
-  generatedToday,
-  onAccountTierChange,
-  onProviderChange,
-  onModelChange,
+  freeUsedToday,
+  freeLimit,
+  onOpenChange,
   onApiKeyChange,
   onClearApiKeys,
 }: Props) {
-  const [open, setOpen] = useState(false);
-  const selectedProvider = MODEL_PROVIDERS.find((item) => item.id === provider) ?? MODEL_PROVIDERS[0];
-  const quotaUsed = accountTier === "paid" ? generatedToday : historyCount;
-  const quotaLimit = FREE_LIMITS[accountTier];
-  const apiKeysEnabled = accountTier !== "guest";
-  const modelControlsEnabled = accountTier !== "guest";
+  const [tab, setTab] = useState<Tab>("keys");
+  const quotaUsed = freeUsedToday;
+  const quotaLimit = freeLimit;
+  const apiKeysEnabled = tier !== "guest";
 
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="fixed right-4 top-28 z-40 inline-flex items-center gap-2 rounded-full border border-white/10 bg-ink-700/80 px-4 py-2 text-sm text-white/80 shadow-led-soft backdrop-blur-xl transition hover:border-neon-purple/40 hover:text-white"
-      >
-        <span className="font-mono text-neon-purple">S</span>
-        Settings
-      </button>
-
-      <div
-        className={[
-          "fixed inset-0 z-50 transition",
-          open ? "pointer-events-auto" : "pointer-events-none",
-        ].join(" ")}
-        aria-hidden={!open}
-      >
-        <div
-          onClick={() => setOpen(false)}
-          className={[
-            "absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity",
-            open ? "opacity-100" : "opacity-0",
-          ].join(" ")}
-        />
-        <aside
-          role="dialog"
-          aria-label="Settings"
-          className={[
-            "absolute right-0 top-0 flex h-full w-full max-w-md flex-col border-l border-white/10 bg-ink-800/95 backdrop-blur-xl transition-transform duration-300",
-            open ? "translate-x-0" : "translate-x-full",
-          ].join(" ")}
-        >
-          <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-            <h2 className="text-lg font-semibold">Settings</h2>
+    <Modal open={open} onClose={() => onOpenChange(false)} title="Settings" ariaLabel="Settings">
+      <div className="mb-5 grid grid-cols-2 gap-1 rounded-xl border border-white/10 bg-white/[0.02] p-1">
+        {TABS.map((item) => {
+          const active = tab === item.id;
+          return (
             <button
+              key={item.id}
               type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Close"
-              className="rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1 text-sm text-white/60 transition hover:text-white"
+              onClick={() => setTab(item.id)}
+              className={[
+                "rounded-lg px-3 py-2 text-sm font-semibold transition",
+                active
+                  ? "bg-white/[0.08] text-white"
+                  : "text-white/55 hover:text-white",
+              ].join(" ")}
             >
-              x
+              {item.label}
             </button>
-          </div>
-
-          <div className="flex-1 space-y-6 overflow-y-auto px-5 py-4">
-            <section>
-              <div className="mb-2 flex items-center justify-between text-sm font-semibold text-white/80">
-                <span>Account</span>
-                <span className="font-mono text-xs text-white/35">
-                  {quotaUsed}/{quotaLimit}
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {TIERS.map((tier) => {
-                  const active = accountTier === tier.id;
-                  return (
-                    <button
-                      key={tier.id}
-                      type="button"
-                      onClick={() => onAccountTierChange(tier.id)}
-                      className={[
-                        "rounded-lg border px-2 py-2 text-left transition",
-                        active
-                          ? "border-neon-cyan/50 bg-neon-cyan/10 text-white shadow-led-cyan"
-                          : "border-white/10 bg-white/[0.02] text-white/55 hover:border-white/25",
-                      ].join(" ")}
-                    >
-                      <span className="block text-sm font-semibold">{tier.label}</span>
-                      <span className="block text-[10px] text-white/35">{tier.detail}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section>
-              <span className="mb-2 block text-sm font-semibold text-white/80">Provider</span>
-              <div className="grid grid-cols-3 gap-2">
-                {MODEL_PROVIDERS.map((item) => {
-                  const active = provider === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      disabled={!modelControlsEnabled}
-                      onClick={() => onProviderChange(item.id)}
-                      className={[
-                        "rounded-lg border px-2 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-45",
-                        active
-                          ? "border-neon-magenta/50 bg-neon-magenta/10 text-white shadow-led-magenta"
-                          : "border-white/10 bg-white/[0.02] text-white/55 hover:border-white/25",
-                      ].join(" ")}
-                    >
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section>
-              <label htmlFor="model" className="mb-2 block text-sm font-semibold text-white/80">
-                Model
-              </label>
-              <select
-                id="model"
-                value={model}
-                disabled={!modelControlsEnabled}
-                onChange={(event) => onModelChange(provider, event.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-ink-700/80 px-3 py-2.5 text-sm text-white outline-none transition focus:border-neon-cyan/50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {selectedProvider.models.map((item) => (
-                  <option key={item.id} value={item.id} className="bg-ink-800 text-white">
-                    {item.label} - {item.cost}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-2 text-xs leading-snug text-white/40">
-                {modelControlsEnabled
-                  ? selectedProvider.models.find((item) => item.id === model)?.blurb
-                  : "Guest generations use the platform's low-cost model."}
-              </p>
-            </section>
-
-            <section>
-              <div className="mb-2 flex items-center justify-between">
-                <label htmlFor="apiKey" className="text-sm font-semibold text-white/80">
-                  {selectedProvider.keyLabel}
-                </label>
-                {apiKeys[provider] && (
-                  <span className="rounded-full border border-neon-lime/30 bg-neon-lime/10 px-2 py-0.5 text-[10px] text-neon-lime">
-                    Saved
-                  </span>
-                )}
-              </div>
-              <input
-                id="apiKey"
-                type="password"
-                value={apiKeys[provider]}
-                disabled={!apiKeysEnabled}
-                onChange={(event) => onApiKeyChange(provider, event.target.value)}
-                placeholder={apiKeysEnabled ? "sk-..." : "Log in to use your own key"}
-                className="w-full rounded-xl border border-white/10 bg-ink-700/80 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-neon-cyan/50 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-              <p className="mt-2 text-xs leading-snug text-white/35">
-                Keys are stored in this browser and sent only with generation requests.
-              </p>
-            </section>
-          </div>
-
-          <div className="border-t border-white/10 px-5 py-3">
-            <button
-              type="button"
-              onClick={onClearApiKeys}
-              className="text-xs text-white/40 transition hover:text-red-300"
-            >
-              Clear API keys
-            </button>
-          </div>
-        </aside>
+          );
+        })}
       </div>
-    </>
+
+      {tab === "keys" && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold text-white/80">Your API keys</span>
+            {!apiKeysEnabled && (
+              <span className="text-[11px] text-white/35">Log in to use your own keys</span>
+            )}
+          </div>
+          <div className="space-y-3">
+            {MODEL_PROVIDERS.map((item) => (
+              <div key={item.id}>
+                <div className="mb-1 flex items-center justify-between">
+                  <label htmlFor={`apiKey-${item.id}`} className="text-xs font-medium text-white/65">
+                    {item.keyLabel}
+                  </label>
+                  {apiKeys[item.id] && (
+                    <span className="rounded-full border border-neon-lime/30 bg-neon-lime/10 px-2 py-0.5 text-[10px] text-neon-lime">
+                      Saved
+                    </span>
+                  )}
+                </div>
+                <input
+                  id={`apiKey-${item.id}`}
+                  type="password"
+                  value={apiKeys[item.id]}
+                  disabled={!apiKeysEnabled}
+                  onChange={(event) => onApiKeyChange(item.id, event.target.value)}
+                  placeholder={apiKeysEnabled ? "sk-..." : "Log in to use your own key"}
+                  className="w-full rounded-xl border border-white/10 bg-transparent px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-neon-cyan/50 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+            ))}
+          </div>
+          <p className="text-xs leading-snug text-white/35">
+            Keys are stored in this browser and sent only with generation requests.
+          </p>
+          <button
+            type="button"
+            onClick={onClearApiKeys}
+            className="text-xs text-white/40 transition hover:text-red-300"
+          >
+            Clear API keys
+          </button>
+        </section>
+      )}
+
+      {tab === "billing" && (
+        <section className="space-y-5">
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-white/80">Current usage</span>
+              <span className="font-mono text-xs text-white/35">
+                {quotaUsed}/{quotaLimit}
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-white/45">Free names used today.</p>
+          </div>
+
+          <div>
+            <span className="mb-2 block text-sm font-semibold text-white/80">Plan</span>
+            <div className="grid grid-cols-3 gap-2">
+              {PLAN_TIERS.map((planTier) => {
+                const meta = TIER_META[planTier];
+                const current = tier === planTier;
+                const cls = [
+                  "block h-full rounded-lg border px-2.5 py-2 text-left transition",
+                  current
+                    ? "border-white/30 bg-white/[0.08]"
+                    : "border-white/10 bg-white/[0.02] hover:border-white/25",
+                ].join(" ");
+                const inner = (
+                  <>
+                    <span className="block text-sm font-semibold text-white">{meta.short}</span>
+                    <span className="block text-[10px] text-white/45">{meta.price}</span>
+                    <span className="mt-1 block text-[10px] text-white/35">
+                      {current ? "Current plan" : "Upgrade"}
+                    </span>
+                  </>
+                );
+                return current ? (
+                  <div key={planTier} className={cls}>
+                    {inner}
+                  </div>
+                ) : (
+                  <Link
+                    key={planTier}
+                    href={authenticated ? "/pricing" : "/?panel=account"}
+                    className={cls}
+                  >
+                    {inner}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          <p className="text-xs leading-snug text-white/40">
+            Add your own API key to generate without limits — Namblo only uses it for
+            generation requests.
+          </p>
+
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+              href="/subscription"
+              className="w-full rounded-xl border border-white/15 bg-white/[0.03] px-4 py-2.5 text-center text-sm font-semibold text-white/80 transition hover:border-white/30"
+            >
+              Manage subscription
+            </Link>
+            <Link
+              href="/pricing"
+              className="w-full rounded-xl border border-white/15 bg-white/[0.03] px-4 py-2.5 text-center text-sm font-semibold text-white/80 transition hover:border-white/30"
+            >
+              Compare plans
+            </Link>
+          </div>
+        </section>
+      )}
+    </Modal>
   );
 }

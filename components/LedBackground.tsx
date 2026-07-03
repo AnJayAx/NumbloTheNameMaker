@@ -1,24 +1,35 @@
-/** Animated neon glow backdrop — pure CSS, sits behind all content. */
+/** Ambient backdrop — charcoal wash + a fine film grain, monochrome. */
 export default function LedBackground() {
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-ink-900">
-      {/* grid */}
+    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      {/* base wash */}
       <div
-        className="absolute inset-0 opacity-[0.18]"
+        className="absolute inset-0"
         style={{
-          backgroundImage:
-            "linear-gradient(rgba(120,130,160,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(120,130,160,0.18) 1px, transparent 1px)",
-          backgroundSize: "44px 44px",
-          maskImage: "radial-gradient(ellipse at 50% 0%, black 30%, transparent 75%)",
-          WebkitMaskImage: "radial-gradient(ellipse at 50% 0%, black 30%, transparent 75%)",
+          background: "radial-gradient(125% 85% at 50% -10%, var(--bg-2), var(--bg) 55%)",
         }}
       />
-      {/* neon orbs */}
-      <div className="absolute -top-40 -left-32 h-[34rem] w-[34rem] rounded-full bg-neon-cyan/20 blur-[120px] animate-drift" />
-      <div className="absolute top-10 right-[-10rem] h-[30rem] w-[30rem] rounded-full bg-neon-magenta/20 blur-[120px] animate-drift [animation-delay:-6s]" />
-      <div className="absolute bottom-[-12rem] left-1/3 h-[32rem] w-[32rem] rounded-full bg-neon-purple/20 blur-[130px] animate-drift [animation-delay:-12s]" />
-      {/* vignette */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-ink-900" />
+
+      {/* faint neutral light source, top-center */}
+      <div
+        className="absolute left-1/2 top-[-16rem] h-[34rem] w-[60rem] -translate-x-1/2 rounded-full blur-[150px]"
+        style={{ background: "radial-gradient(closest-side, rgba(255,255,255,0.05), transparent)" }}
+      />
+
+      {/* fine grain */}
+      <div
+        className="absolute inset-0 opacity-[0.06] mix-blend-soft-light"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+        }}
+      />
+
+      {/* bottom vignette */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-64"
+        style={{ background: "linear-gradient(to bottom, transparent, var(--bg))" }}
+      />
     </div>
   );
 }

@@ -6,12 +6,14 @@ export interface DomainChecker {
   check(domains: string[]): Promise<DomainResult[]>;
 }
 
+export type DomainProviderId = "rdap" | "namecheap" | "porkbun" | "mock";
+
 /**
  * Returns the configured domain checker, chosen by DOMAIN_PROVIDER
  * (rdap | namecheap | porkbun | mock). Adapters are imported lazily.
  */
-export async function getDomainChecker(): Promise<DomainChecker> {
-  const provider = (process.env.DOMAIN_PROVIDER || "rdap").toLowerCase();
+export async function getDomainChecker(providerOverride?: DomainProviderId): Promise<DomainChecker> {
+  const provider = (providerOverride || process.env.DOMAIN_PROVIDER || "rdap").toLowerCase();
   switch (provider) {
     case "rdap": {
       const { RdapChecker } = await import("@/lib/domains/rdap");

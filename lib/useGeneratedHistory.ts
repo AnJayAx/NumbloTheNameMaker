@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { loadNameDataColumn, saveNameDataColumn } from "@/lib/supabase/nameData";
+import { useAuth } from "@/lib/useAuth";
 import { toDomain, toDomainLabel, type DomainResult, type NameIdea } from "@/lib/types";
 
 export interface GeneratedNameHistoryEntry {
@@ -12,7 +14,8 @@ export interface GeneratedNameHistoryEntry {
   domains: DomainResult[];
 }
 
-const STORAGE_KEY = "mark.generated-history.v1";
+const STORAGE_KEY = "namblo.generated-history.v1";
+const MAX_HISTORY_ENTRIES = 750;
 
 export function generatedNameKey(name: string): string {
   return toDomainLabel(name.trim());
@@ -42,52 +45,90 @@ function entryFromIdea(
  * names that were discarded because every requested TLD was taken.
  */
 export function useGeneratedHistory() {
+  const { loading: authLoading, supabase, user } = useAuth();
+  const userId = user?.id ?? null;
   const [history, setHistory] = useState<GeneratedNameHistoryEntry[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const lastRemoteJson = useRef<string | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          const restored = parsed
-            .map((item): GeneratedNameHistoryEntry | null => {
-              if (typeof item === "string") return entryFromIdea(item);
-              if (item && typeof item.name === "string") {
-                const domains = Array.isArray(item.domains)
-                  ? item.domains.filter(isDomainResult)
-                  : [];
-                return entryFromIdea(
-                  {
-                    name: item.name,
-                    rationale: typeof item.rationale === "string" ? item.rationale : "",
-                    style: typeof item.style === "string" ? item.style : "",
-                  },
-                  Number(item.generatedAt) || Date.now(),
-                  domains,
-                );
-              }
-              return null;
-            })
-            .filter((item): item is GeneratedNameHistoryEntry => Boolean(item));
-          setHistory(dedupe(restored));
-        }
-      }
-    } catch {
-      /* ignore corrupt/unavailable storage */
+    let cancelled = false;
+
+    if (authLoading) {
+      setHydrated(false);
+      return () => {
+        cancelled = true;
+      };
     }
-    setHydrated(true);
-  }, []);
+
+    setHydrated(false);
+    lastRemoteJson.current = null;
+    const localHistory = readLocalHistory();
+
+    if (!supabase || !userId) {
+      setHistory(localHistory);
+      setHydrated(true);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const activeSupabase = supabase;
+    const activeUserId = userId;
+
+    async function hydrateRemote() {
+      try {
+        const remoteValue = await loadNameDataColumn(activeSupabase, activeUserId, "history");
+        if (cancelled) return;
+
+        const remoteHistory = normalizeHistory(remoteValue);
+        const merged = mergeHistory(remoteHistory, localHistory);
+        const remoteJson = serializeHistory(remoteHistory);
+        const mergedJson = serializeHistory(merged);
+
+        setHistory(merged);
+        lastRemoteJson.current = remoteJson;
+
+        if (mergedJson !== remoteJson) {
+          await saveNameDataColumn(activeSupabase, activeUserId, "history", merged);
+          lastRemoteJson.current = mergedJson;
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.warn("Could not load Supabase history; using local history.", error);
+          setHistory(localHistory);
+          lastRemoteJson.current = null;
+        }
+      } finally {
+        if (!cancelled) setHydrated(true);
+      }
+    }
+
+    void hydrateRemote();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, supabase, userId]);
 
   useEffect(() => {
     if (!hydrated) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-    } catch {
-      /* storage full or unavailable */
-    }
-  }, [history, hydrated]);
+
+    writeLocalHistory(history);
+
+    if (!supabase || !userId) return;
+    const activeSupabase = supabase;
+    const activeUserId = userId;
+
+    const nextJson = serializeHistory(history);
+    if (nextJson === lastRemoteJson.current) return;
+
+    lastRemoteJson.current = nextJson;
+    void saveNameDataColumn(activeSupabase, activeUserId, "history", history).catch((error) => {
+      console.warn("Could not save Supabase history.", error);
+      lastRemoteJson.current = null;
+    });
+  }, [history, hydrated, supabase, userId]);
 
   const keys = useMemo(() => new Set(history.map((item) => item.key)), [history]);
   const names = useMemo(() => history.map((item) => item.name), [history]);
@@ -104,7 +145,7 @@ export function useGeneratedHistory() {
         seen.add(entry.key);
         next.push(entry);
       }
-      return next;
+      return trimHistory(next);
     });
   }, []);
 
@@ -123,11 +164,7 @@ export function useGeneratedHistory() {
         prev.map((entry) => {
           const domains = checked.get(entry.key);
           if (!domains) return entry;
-          const merged = new Map(entry.domains.map((domain) => [domain.domain, domain]));
-          for (const domain of domains) {
-            merged.set(domain.domain, domain);
-          }
-          return { ...entry, domains: Array.from(merged.values()) };
+          return { ...entry, domains: mergeDomainResults(entry.domains, domains) };
         }),
       );
     },
@@ -139,17 +176,99 @@ export function useGeneratedHistory() {
   return { history, hydrated, keys, names, has, remember, rememberDomains, clear };
 }
 
-function isDomainResult(value: unknown): value is DomainResult {
-  return Boolean(value && typeof value === "object" && "domain" in value);
+function readLocalHistory(): GeneratedNameHistoryEntry[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    return normalizeHistory(JSON.parse(raw));
+  } catch {
+    return [];
+  }
 }
 
-function dedupe(entries: GeneratedNameHistoryEntry[]): GeneratedNameHistoryEntry[] {
-  const seen = new Set<string>();
-  const result: GeneratedNameHistoryEntry[] = [];
-  for (const entry of entries) {
-    if (seen.has(entry.key)) continue;
-    seen.add(entry.key);
-    result.push(entry);
+function writeLocalHistory(history: GeneratedNameHistoryEntry[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, serializeHistory(history));
+  } catch {
+    /* storage full or unavailable */
   }
-  return result;
+}
+
+function normalizeHistory(value: unknown): GeneratedNameHistoryEntry[] {
+  if (!Array.isArray(value)) return [];
+
+  const restored = value
+    .map((item): GeneratedNameHistoryEntry | null => {
+      if (typeof item === "string") return entryFromIdea(item);
+      if (item && typeof item === "object" && "name" in item) {
+        const candidate = item as Partial<GeneratedNameHistoryEntry>;
+        if (typeof candidate.name !== "string") return null;
+        const domains = Array.isArray(candidate.domains)
+          ? candidate.domains.filter(isDomainResult)
+          : [];
+        return entryFromIdea(
+          {
+            name: candidate.name,
+            rationale: typeof candidate.rationale === "string" ? candidate.rationale : "",
+            style: typeof candidate.style === "string" ? candidate.style : "",
+          },
+          Number(candidate.generatedAt) || Date.now(),
+          domains,
+        );
+      }
+      return null;
+    })
+    .filter((item): item is GeneratedNameHistoryEntry => Boolean(item));
+
+  return mergeHistory(restored);
+}
+
+function serializeHistory(history: GeneratedNameHistoryEntry[]): string {
+  return JSON.stringify(trimHistory(history));
+}
+
+function isDomainResult(value: unknown): value is DomainResult {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Partial<DomainResult>;
+  return (
+    typeof item.domain === "string" &&
+    typeof item.tld === "string" &&
+    typeof item.available === "boolean" &&
+    typeof item.source === "string"
+  );
+}
+
+function mergeHistory(...lists: GeneratedNameHistoryEntry[][]): GeneratedNameHistoryEntry[] {
+  const byKey = new Map<string, GeneratedNameHistoryEntry>();
+
+  for (const entry of lists.flat()) {
+    const existing = byKey.get(entry.key);
+    if (!existing) {
+      byKey.set(entry.key, entry);
+      continue;
+    }
+
+    byKey.set(entry.key, {
+      ...existing,
+      ...entry,
+      generatedAt: Math.min(existing.generatedAt, entry.generatedAt),
+      rationale: existing.rationale || entry.rationale,
+      style: existing.style || entry.style,
+      domains: mergeDomainResults(existing.domains, entry.domains),
+    });
+  }
+
+  return trimHistory(
+    Array.from(byKey.values()).sort((a, b) => a.generatedAt - b.generatedAt),
+  );
+}
+
+function mergeDomainResults(...lists: DomainResult[][]): DomainResult[] {
+  const byDomain = new Map<string, DomainResult>();
+  for (const domain of lists.flat()) byDomain.set(domain.domain, domain);
+  return Array.from(byDomain.values());
+}
+
+function trimHistory(history: GeneratedNameHistoryEntry[]): GeneratedNameHistoryEntry[] {
+  return history.slice(-MAX_HISTORY_ENTRIES);
 }
