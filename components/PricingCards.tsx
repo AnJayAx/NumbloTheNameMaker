@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { TIER_META, type AccountTier } from "@/lib/limits";
 import { useAuth } from "@/lib/useAuth";
 import { useServerQuota } from "@/lib/useServerQuota";
 
-const ORDER: AccountTier[] = ["guest", "friend", "tea", "sugar"];
+const FREE_TIERS: AccountTier[] = ["guest", "friend"];
+const PREMIUM_TIERS: AccountTier[] = ["tea", "sugar"];
 const RANK: Record<AccountTier, number> = { guest: 0, friend: 1, tea: 2, sugar: 3 };
 
 interface Cta {
@@ -26,9 +27,9 @@ function ctaFor(tier: AccountTier, current: AccountTier, loggedIn: boolean): Cta
       case "friend":
         return { label: "Log in", kind: "link", href: "/?panel=account", variant: "primary" };
       case "tea":
-        return { label: "Get Tea", kind: "link", href: "/?panel=account", variant: "ghost" };
+        return { label: "Subscribe", kind: "link", href: "/?panel=account", variant: "primary" };
       case "sugar":
-        return { label: "Sugar me up", kind: "link", href: "/?panel=account", variant: "ghost" };
+        return { label: "Subscribe", kind: "link", href: "/?panel=account", variant: "primary" };
     }
   }
 
@@ -114,56 +115,82 @@ export default function PricingCards() {
     );
   };
 
+  const renderCard = (tier: AccountTier) => {
+    const meta = TIER_META[tier];
+    const isCurrent = tier === current;
+    const badge = isCurrent ? "Current" : tier === "friend" ? "Popular" : null;
+    const cta = ctaFor(tier, current, loggedIn);
+    return (
+      <section
+        key={tier}
+        className={[
+          "glass card-hover relative flex h-full flex-col p-6",
+          isCurrent ? "border-white/30" : "",
+        ].join(" ")}
+      >
+        {/* Reserved badge row keeps every card's title/price aligned. */}
+        <div className="mb-3 h-5">
+          {badge && (
+            <span className="inline-flex rounded-full border border-white/20 bg-white/[0.06] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/70">
+              {badge}
+            </span>
+          )}
+        </div>
+        <h2 className="flex min-h-[2.75rem] items-start text-base font-semibold leading-tight text-white">
+          {meta.label}
+        </h2>
+        <p className="mt-2 text-3xl font-black tracking-tight text-white">{meta.price}</p>
+        <p className="mt-1 text-xs text-white/45">{meta.tagline}</p>
+
+        <ul className="mt-6 flex-1 space-y-2.5 text-sm text-white/65">
+          {meta.features.map((feature) => (
+            <li key={feature} className="flex gap-2.5">
+              <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/10 text-[10px] text-white/70">
+                ✓
+              </span>
+              <span>{feature}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-6">{renderCta(cta)}</div>
+      </section>
+    );
+  };
+
   return (
     <>
-      <div className="mx-auto mt-14 grid max-w-2xl items-stretch gap-4 sm:grid-cols-2">
-        {ORDER.map((tier) => {
-          const meta = TIER_META[tier];
-          const isCurrent = tier === current;
-          const badge = isCurrent ? "Current" : tier === "friend" ? "Popular" : null;
-          const cta = ctaFor(tier, current, loggedIn);
-          return (
-            <section
-              key={tier}
-              className={[
-                "glass card-hover relative flex h-full flex-col p-6",
-                isCurrent ? "border-white/30" : "",
-              ].join(" ")}
-            >
-              {/* Reserved badge row keeps every card's title/price aligned. */}
-              <div className="mb-3 h-5">
-                {badge && (
-                  <span className="inline-flex rounded-full border border-white/20 bg-white/[0.06] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/70">
-                    {badge}
-                  </span>
-                )}
-              </div>
-              <h2 className="flex min-h-[2.75rem] items-start text-base font-semibold leading-tight text-white">
-                {meta.label}
-              </h2>
-              <p className="mt-2 text-3xl font-black tracking-tight text-white">{meta.price}</p>
-              <p className="mt-1 text-xs text-white/45">{meta.tagline}</p>
-
-              <ul className="mt-6 flex-1 space-y-2.5 text-sm text-white/65">
-                {meta.features.map((feature) => (
-                  <li key={feature} className="flex gap-2.5">
-                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/10 text-[10px] text-white/70">
-                      ✓
-                    </span>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-6">{renderCta(cta)}</div>
-            </section>
-          );
-        })}
+      <div className="mx-auto mt-14 max-w-2xl space-y-12">
+        <div>
+          <GroupTitle>Free</GroupTitle>
+          <div className="mt-6 grid items-stretch gap-4 sm:grid-cols-2">
+            {FREE_TIERS.map(renderCard)}
+          </div>
+        </div>
+        <div>
+          <GroupTitle>Premium</GroupTitle>
+          <div className="mt-6 grid items-stretch gap-4 sm:grid-cols-2">
+            {PREMIUM_TIERS.map(renderCard)}
+          </div>
+        </div>
       </div>
 
       {error && (
         <p className="mx-auto mt-4 max-w-2xl text-center text-sm text-red-300">{error}</p>
       )}
     </>
+  );
+}
+
+/** Centered section heading with a hairline rule flanking it on both sides. */
+function GroupTitle({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex items-center gap-4">
+      <span className="h-px flex-1 bg-white/10" />
+      <span className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
+        {children}
+      </span>
+      <span className="h-px flex-1 bg-white/10" />
+    </div>
   );
 }

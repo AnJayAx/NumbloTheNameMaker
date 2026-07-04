@@ -2,6 +2,7 @@ import type { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import { FREE_LIMITS, type AccountTier } from "@/lib/limits";
+import { ensureProfile } from "@/lib/supabase/admin";
 
 /** httpOnly cookie holding an anonymous guest id for best-effort guest limits. */
 export const GUEST_COOKIE = "namblo_guest";
@@ -82,6 +83,9 @@ export async function resolveSubject(
         .select("plan, current_period_end, subscription_status")
         .eq("id", user.id)
         .maybeSingle();
+      // A logged-in user with no profile row still resolves to the account
+      // default tier here, but bill-time updates would no-op — so heal the row.
+      if (!profile) await ensureProfile(admin, user);
       const tier = planToTier(profile?.plan);
       return {
         subject: `user:${user.id}`,

@@ -9,4 +9,3 @@ alter table public.profiles
 
 create index if not exists profiles_stripe_customer_idx
   on public.profiles (stripe_customer_id);
-a

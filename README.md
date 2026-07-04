@@ -61,8 +61,8 @@ Four tiers, enforced **server-side** in `app/api/generate` and counted in
 |---|---|---|---|---|
 | `guest` (logged out) | Free Loader | Free | 10 | cheap default only |
 | `friend` | Namblo's Friend | Free | 30 | low + medium |
-| `tea` | Tea for Namblo | $4.99/mo | 100 | low + medium |
-| `sugar` | Namblo's Sugar Daddy/Mommy | $49.99/mo | 500 | all (incl. premium) |
+| `tea` | Standard | $4.99/mo | 100 | low + medium |
+| `sugar` | Advanced | $49.99/mo | 500 | all (incl. premium) |
 
 The tier is **server-authoritative** — for a logged-in user it comes from
 `profiles.plan` (surfaced via `/api/quota`), not any client toggle. Guests are

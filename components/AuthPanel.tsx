@@ -3,15 +3,26 @@
 import { FormEvent, useState } from "react";
 import Modal from "@/components/Modal";
 import { USERNAME_PATTERN, useAuth } from "@/lib/useAuth";
+import { MODEL_PROVIDERS } from "@/lib/llm/models";
+import type { LlmProvider } from "@/lib/types";
 
 type AuthMode = "sign-in" | "sign-up";
 
 interface Props {
   open: boolean;
+  apiKeys: Record<LlmProvider, string>;
   onOpenChange: (open: boolean) => void;
+  onApiKeyChange: (provider: LlmProvider, apiKey: string) => void;
+  onClearApiKeys: () => void;
 }
 
-export default function AuthPanel({ open, onOpenChange }: Props) {
+export default function AuthPanel({
+  open,
+  apiKeys,
+  onOpenChange,
+  onApiKeyChange,
+  onClearApiKeys,
+}: Props) {
   const {
     configured,
     loading,
@@ -131,6 +142,44 @@ export default function AuthPanel({ open, onOpenChange }: Props) {
               <p className="mt-2 text-xs leading-snug text-white/40">
                 History and saved names sync to your Supabase account.
               </p>
+            </section>
+
+            <section className="space-y-4">
+              <span className="block text-sm font-semibold text-white/80">API Keys</span>
+              <div className="space-y-3">
+                {MODEL_PROVIDERS.map((item) => (
+                  <div key={item.id}>
+                    <div className="mb-1 flex items-center justify-between">
+                      <label htmlFor={`apiKey-${item.id}`} className="text-xs font-medium text-white/65">
+                        {item.keyLabel}
+                      </label>
+                      {apiKeys[item.id] && (
+                        <span className="rounded-full border border-neon-lime/30 bg-neon-lime/10 px-2 py-0.5 text-[10px] text-neon-lime">
+                          Saved
+                        </span>
+                      )}
+                    </div>
+                    <input
+                      id={`apiKey-${item.id}`}
+                      type="password"
+                      value={apiKeys[item.id]}
+                      onChange={(event) => onApiKeyChange(item.id, event.target.value)}
+                      placeholder="sk-..."
+                      className="w-full rounded-xl border border-white/10 bg-transparent px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-neon-cyan/50"
+                    />
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs leading-snug text-white/35">
+                Keys are stored in this browser and sent only with generation requests.
+              </p>
+              <button
+                type="button"
+                onClick={onClearApiKeys}
+                className="text-xs text-white/40 transition hover:text-red-300"
+              >
+                Clear API keys
+              </button>
             </section>
 
             <button

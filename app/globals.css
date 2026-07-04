@@ -68,6 +68,23 @@ body {
   color: #08080a;
 }
 
+/*
+ * Chrome/Safari paint their own (light) background + text colour on autofilled
+ * fields, overriding `bg-transparent`. Repaint that fill to the panel surface
+ * (.glass = #1e1e1e) via the inset box-shadow trick so saved email/password
+ * inputs blend into the background instead of showing as a lighter box.
+ */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px #1e1e1e inset;
+  box-shadow: 0 0 0 1000px #1e1e1e inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 :focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--ring);

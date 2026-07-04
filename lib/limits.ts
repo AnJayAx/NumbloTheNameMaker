@@ -74,9 +74,9 @@ export const TIER_META: Record<AccountTier, TierMeta> = {
     ],
   },
   tea: {
-    label: "Tea for Namblo",
-    short: "Tea",
-    price: "S$4.99/mo",
+    label: "Standard",
+    short: "Standard",
+    price: "$4.99/mo",
     priceUsd: 4.99,
     tagline: "For regular naming",
     features: [
@@ -87,16 +87,16 @@ export const TIER_META: Record<AccountTier, TierMeta> = {
     ],
   },
   sugar: {
-    label: "Namblo's Sugar Daddy/Mommy",
-    short: "Sugar",
-    price: "S$49.99/mo",
+    label: "Advanced",
+    short: "Advanced",
+    price: "$49.99/mo",
     priceUsd: 49.99,
     tagline: "For heavy naming",
     features: [
       "500 names / day",
       "Premium models on us (Opus, GPT-5, Gemini Pro)",
       "Priority generation",
-      "Everything in Tea for Namblo",
+      "Everything in Standard",
     ],
   },
 };

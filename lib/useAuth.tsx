@@ -67,7 +67,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     supabase.auth
       .getSession()
-      .then(({ data }) => {
+      .then(async ({ data }) => {
+        if (!active) return;
+        // getSession() returns the session from local storage without contacting
+        // the server, so it can be stale — e.g. the refresh token was revoked or
+        // the Supabase project was reset. Verify it resolves to a real user; if
+        // not, clear it so the UI never claims we're logged in while the server
+        // treats every request as an anonymous guest.
+        if (data.session) {
+          const { error } = await supabase.auth.getUser();
+          // Only clear on a genuine auth rejection (revoked/invalid token), not
+          // a transient network error — otherwise an offline user gets logged
+          // out for no reason. The server re-validates on the next real request.
+          if (error && (error.status === 401 || error.status === 403)) {
+            await supabase.auth.signOut();
+            if (active) setSession(null);
+            return;
+          }
+        }
         if (active) setSession(data.session);
       })
       .finally(() => {

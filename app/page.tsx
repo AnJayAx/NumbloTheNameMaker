@@ -14,7 +14,6 @@ import TopMeta from "@/components/TopMeta";
 import Section from "@/components/Section";
 import ResultsGrid from "@/components/ResultsGrid";
 import SavedPanel from "@/components/SavedPanel";
-import SettingsPanel from "@/components/SettingsPanel";
 import { PLATFORM_FREE_MODEL, PLATFORM_FREE_PROVIDER } from "@/lib/llm/models";
 import { matchesNamePattern } from "@/lib/namePattern";
 import { useAiSettings } from "@/lib/useAiSettings";
@@ -29,7 +28,7 @@ import { useSavedNames } from "@/lib/useSavedNames";
 import { toDomain, type DomainResult, type GenerationMode, type NameIdea } from "@/lib/types";
 
 type Status = "idle" | "generating" | "checking";
-type ActiveDrawer = "account" | "history" | "saved" | "settings" | null;
+type ActiveDrawer = "account" | "history" | "saved" | null;
 /** Which product the landing page is showing: Namblo (make) or Nambly (check). */
 type Product = "namblo" | "nambly";
 const MAX_FILL_ROUNDS = 12;
@@ -135,8 +134,7 @@ export default function Home() {
     const target: ActiveDrawer =
       requested === "account" ||
       requested === "saved" ||
-      requested === "history" ||
-      requested === "settings"
+      requested === "history"
         ? requested
         : null;
     if (target) {
@@ -154,10 +152,10 @@ export default function Home() {
     }
   }, []);
 
-  // Refresh the server usage count whenever the Settings drawer opens so the
-  // "Current usage" number is always up to date.
+  // Refresh the server usage count whenever the Account drawer opens so the
+  // tier/usage-derived UI is always up to date.
   useEffect(() => {
-    if (activeDrawer === "settings") quota.refresh();
+    if (activeDrawer === "account") quota.refresh();
   }, [activeDrawer, quota.refresh]);
 
   const handleStopGenerate = () => {
@@ -432,7 +430,6 @@ export default function Home() {
         historyCount={generatedHistory.length}
         onOpenFavourites={() => setActiveDrawer("saved")}
         onOpenHistory={() => setActiveDrawer("history")}
-        onOpenSettings={() => setActiveDrawer("settings")}
         onAccount={() => setActiveDrawer("account")}
       />
       <TopMeta namesLeft={freeRemaining} />
@@ -453,16 +450,8 @@ export default function Home() {
       />
       <AuthPanel
         open={activeDrawer === "account"}
-        onOpenChange={(open) => setActiveDrawer(open ? "account" : null)}
-      />
-      <SettingsPanel
-        open={activeDrawer === "settings"}
-        tier={activeTier}
-        authenticated={Boolean(user)}
         apiKeys={aiSettings.settings.apiKeys}
-        freeUsedToday={quota.used}
-        freeLimit={quota.limit}
-        onOpenChange={(open) => setActiveDrawer(open ? "settings" : null)}
+        onOpenChange={(open) => setActiveDrawer(open ? "account" : null)}
         onApiKeyChange={aiSettings.setApiKey}
         onClearApiKeys={aiSettings.clearApiKeys}
       />
@@ -517,7 +506,7 @@ export default function Home() {
                     blocked={generationBlocked}
                     onGenerate={handleGenerate}
                     onStop={handleStopGenerate}
-                    onRequestKey={() => setActiveDrawer("settings")}
+                    onRequestKey={() => setActiveDrawer("account")}
                   />
                 </Section>
               </div>

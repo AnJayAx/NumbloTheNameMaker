@@ -29,7 +29,6 @@ export default function SiteNavbar() {
         historyCount={history.length}
         onOpenFavourites={() => router.push("/?panel=saved")}
         onOpenHistory={() => router.push("/?panel=history")}
-        onOpenSettings={() => router.push("/?panel=settings")}
         onAccount={() => router.push("/?panel=account")}
       />
       <TopMeta namesLeft={quota.remaining} />

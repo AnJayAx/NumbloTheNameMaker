@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin, getUserFromRequest } from "@/lib/supabase/admin";
+import { ensureProfile, getSupabaseAdmin, getUserFromRequest } from "@/lib/supabase/admin";
 import { getStripe, priceForTier } from "@/lib/stripe";
 
 export const runtime = "nodejs";
@@ -16,6 +16,11 @@ export async function POST(request: Request) {
   if (!user) {
     return NextResponse.json({ error: "Sign in to subscribe." }, { status: 401 });
   }
+
+  // Guarantee the profile row exists before writing billing fields to it —
+  // otherwise the customer-id update below and the webhook's plan update both
+  // silently no-op, and the user would pay without ever getting the plan.
+  await ensureProfile(admin, user);
 
   let body: { tier?: string };
   try {

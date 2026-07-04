@@ -216,10 +216,19 @@ export default function SubscriptionPage() {
               </p>
             )}
 
-            <p className="mt-5 max-w-md text-xs leading-snug text-white/40">
-              Add your own API key in Settings to generate without limits — Namblo only
-              uses your key for generation requests.
-            </p>
+            <div className="mt-6">
+              <p className="text-sm font-semibold text-white/80">What&apos;s included</p>
+              <ul className="mt-3 space-y-2.5 text-sm text-white/70">
+                {meta.features.map((feature) => (
+                  <li key={feature} className="flex gap-2.5">
+                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/10 text-[10px] text-white/70">
+                      ✓
+                    </span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
               {quota.tier !== "sugar" && (
@@ -237,9 +246,6 @@ export default function SubscriptionPage() {
                   {busy ? "Opening…" : "Manage subscription"}
                 </button>
               )}
-              <Link href="/pricing" className="btn-ghost text-sm">
-                Compare plans
-              </Link>
             </div>
 
             {hasSubscription && (

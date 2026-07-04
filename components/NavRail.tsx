@@ -11,7 +11,6 @@ interface Props {
   historyCount?: number;
   onOpenFavourites: () => void;
   onOpenHistory: () => void;
-  onOpenSettings: () => void;
   onAccount: () => void;
 }
 
@@ -31,7 +30,6 @@ export default function NavRail({
   historyCount = 0,
   onOpenFavourites,
   onOpenHistory,
-  onOpenSettings,
   onAccount,
 }: Props) {
   const avatar = user ? avatarUrl(user) : null;
@@ -53,11 +51,13 @@ export default function NavRail({
       <RailItem label="History" onClick={onOpenHistory} count={historyCount}>
         <HistoryIcon />
       </RailItem>
-      <RailItem label="Settings" onClick={onOpenSettings}>
-        <GearIcon />
-      </RailItem>
       {user ? (
-        <AccountItem user={user} avatar={avatar} placement={placement} />
+        <AccountItem
+          user={user}
+          avatar={avatar}
+          placement={placement}
+          onOpenApiKeys={onAccount}
+        />
       ) : (
         <RailItem label="Sign in" onClick={onAccount}>
           <UserIcon />
@@ -85,13 +85,16 @@ function AccountItem({
   user,
   avatar,
   placement,
+  onOpenApiKeys,
 }: {
   user: User;
   avatar: string | null;
   placement: "right" | "top";
+  onOpenApiKeys: () => void;
 }) {
   const { signOut } = useAuth();
   const [open, setOpen] = useState(false);
+  const [avatarBroken, setAvatarBroken] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -128,9 +131,18 @@ function AccountItem({
         aria-expanded={open}
         className="rail-btn text-white"
       >
-        {avatar ? (
+        {avatar && !avatarBroken ? (
+          // Google's image CDN 403s requests that carry a Referer header, so the
+          // avatar breaks without `no-referrer`. Fall back to the icon if it
+          // still fails to load (deleted photo, offline, etc.).
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={avatar} alt="" className="h-7 w-7 rounded-full object-cover" />
+          <img
+            src={avatar}
+            alt=""
+            referrerPolicy="no-referrer"
+            onError={() => setAvatarBroken(true)}
+            className="h-7 w-7 rounded-full object-cover"
+          />
         ) : (
           <UserIcon />
         )}
@@ -160,6 +172,18 @@ function AccountItem({
             <CardIcon />
             Billing
           </MenuLink>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              onOpenApiKeys();
+            }}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-white/70 transition hover:bg-white/[0.06] hover:text-white [&_svg]:h-[18px] [&_svg]:w-[18px]"
+          >
+            <KeyIcon />
+            API Keys
+          </button>
           <div className="my-1 h-px bg-white/10" />
           <button
             type="button"
@@ -299,14 +323,6 @@ function HistoryIcon() {
   );
 }
 
-function GearIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className="h-[22px] w-[22px]">
-      <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54A.484.484 0 0 0 13.4 2h-2.8c-.24 0-.44.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.489.489 0 0 0-.59.22L2.85 8.47a.49.49 0 0 0 .12.61l2.03 1.58c-.05.3-.07.62-.07.94 0 .32.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.03.24.23.41.47.41h2.8c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z" />
-    </svg>
-  );
-}
-
 function UserIcon() {
   return (
     <svg {...iconProps()}>
@@ -322,6 +338,17 @@ function CardIcon() {
       <rect x="3" y="5" width="18" height="14" rx="2.5" />
       <path d="M3 9.5h18" />
       <path d="M6.5 14.5h4" />
+    </svg>
+  );
+}
+
+function KeyIcon() {
+  return (
+    <svg {...iconProps()}>
+      <circle cx="8" cy="15" r="4" />
+      <path d="M10.85 12.15 20 3" />
+      <path d="M17 6l2.5 2.5" />
+      <path d="M14 9l2.5 2.5" />
     </svg>
   );
 }
