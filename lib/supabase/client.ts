@@ -1,6 +1,7 @@
 "use client";
 
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 
 let browserClient: SupabaseClient<Database> | null = null;
@@ -9,19 +10,17 @@ export function isSupabaseConfigured(): boolean {
   return Boolean(getSupabaseUrl() && getSupabaseKey());
 }
 
+/**
+ * Cookie-based browser client (@supabase/ssr). Sessions live in cookies so the
+ * server (middleware / route handlers) can read them. PKCE by default.
+ */
 export function getSupabaseBrowserClient(): SupabaseClient<Database> | null {
   const url = getSupabaseUrl();
   const key = getSupabaseKey();
   if (!url || !key) return null;
 
   if (!browserClient) {
-    browserClient = createClient<Database>(url, key, {
-      auth: {
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        persistSession: true,
-      },
-    });
+    browserClient = createBrowserClient<Database>(url, key);
   }
 
   return browserClient;

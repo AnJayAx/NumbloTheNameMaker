@@ -36,6 +36,22 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
 ```
 
+Auth is **cookie-based** (`@supabase/ssr`): `middleware.ts` refreshes the session,
+and OAuth / email-confirmation links land on `app/auth/callback` which exchanges the
+`?code` for a session. Two required Supabase settings (Authentication → **URL
+Configuration**):
+
+- **Site URL**: `https://namblo.com` (the fallback redirect — if this is `localhost`,
+  logins on the live site bounce to localhost).
+- **Redirect URLs** allowlist: `https://namblo.com/**`, `https://www.namblo.com/**`,
+  `http://localhost:3000/**`.
+
+For **email sign-up**, Authentication → **Providers → Email**: either turn **"Confirm
+email" off** (users sign in immediately after sign-up — simplest) or keep it on and
+configure **custom SMTP** (Supabase's built-in email is rate-limited and unreliable).
+The Google OAuth client's authorized redirect URI stays the Supabase callback
+(`https://<project-ref>.supabase.co/auth/v1/callback`).
+
 ### Pricing tiers
 
 Four tiers, enforced **server-side** in `app/api/generate` and counted in

@@ -127,7 +127,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ): Promise<AuthActionResult> => {
       if (!supabase) return { error: "Supabase is not configured yet." };
       const redirectTo =
-        typeof window === "undefined" ? undefined : window.location.origin;
+        typeof window === "undefined"
+          ? undefined
+          : `${window.location.origin}/auth/callback`;
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -150,7 +152,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithGoogle = useCallback(async (): Promise<AuthActionResult> => {
     if (!supabase) return { error: "Supabase is not configured yet." };
     const redirectTo =
-      typeof window === "undefined" ? undefined : window.location.origin;
+      typeof window === "undefined"
+        ? undefined
+        : `${window.location.origin}/auth/callback`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: redirectTo ? { redirectTo } : undefined,
