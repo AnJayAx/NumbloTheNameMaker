@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import Image from "next/image";
 import LedBackground from "@/components/LedBackground";
 import Hero from "@/components/Hero";
 import ModeSelector from "@/components/ModeSelector";
@@ -457,9 +458,14 @@ export default function Home() {
       />
       <main className="mx-auto w-full max-w-2xl px-5 pb-32 pt-20">
         <div className="flex flex-col items-center text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/[0.12] text-xl font-bold text-white">
-            N
-          </div>
+          <Image
+            src="/logo.png"
+            alt="Namblo"
+            width={56}
+            height={56}
+            priority
+            className="h-14 w-14 object-contain"
+          />
 
           <div className="mt-7 w-full">
             <ProductSwitch product={product} onChange={setProduct} />

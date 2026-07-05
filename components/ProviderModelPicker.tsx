@@ -2,8 +2,15 @@
 
 import Select from "@/components/Select";
 import { MODEL_PROVIDERS } from "@/lib/llm/models";
-import { modelAllowed, type AccountTier } from "@/lib/limits";
+import { modelAllowed, TIER_META, type AccountTier, type ModelCost } from "@/lib/limits";
 import type { LlmProvider } from "@/lib/types";
+
+/** Lowest tier that can run a model of this cost on the platform key. */
+const TIER_ORDER: AccountTier[] = ["guest", "friend", "tea", "sugar"];
+function requiredTierName(cost: ModelCost): string {
+  const tier = TIER_ORDER.find((t) => modelAllowed(t, cost, false)) ?? "sugar";
+  return TIER_META[tier].short;
+}
 
 interface Props {
   provider: LlmProvider;
@@ -81,7 +88,7 @@ export default function ProviderModelPicker({
             return {
               value: item.id,
               label: item.label,
-              hint: allowed ? item.cost : "🔒 Sugar",
+              hint: allowed ? item.cost : `🔒 ${requiredTierName(item.cost)}`,
               disabled: !allowed,
             };
           })}

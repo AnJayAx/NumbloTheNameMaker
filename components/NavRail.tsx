@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import type { User } from "@supabase/supabase-js";
 import { useAuth } from "@/lib/useAuth";
@@ -68,9 +69,14 @@ export default function NavRail({
 
   return (
     <>
-      {/* Desktop rail — icons centred vertically */}
-      <nav className="fixed left-0 top-0 z-40 hidden h-full w-16 flex-col items-center justify-center gap-2 md:flex">
-        {renderItems("right")}
+      {/* Desktop rail — logo pinned top, icons centred in the remaining space */}
+      <nav className="fixed left-0 top-0 z-40 hidden h-full w-16 flex-col items-center md:flex">
+        <Link href="/" aria-label="Namblo home" className="mt-4 shrink-0">
+          <Image src="/logo.png" alt="Namblo" width={36} height={36} className="h-9 w-9 object-contain" priority />
+        </Link>
+        <div className="flex flex-1 flex-col items-center justify-center gap-2">
+          {renderItems("right")}
+        </div>
       </nav>
 
       {/* Mobile bottom bar */}
