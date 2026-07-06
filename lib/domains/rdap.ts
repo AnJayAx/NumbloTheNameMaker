@@ -5,7 +5,7 @@ import { DomainChecker, mapWithConcurrency, splitDomain } from "@/lib/domains/pr
 /**
  * Free availability checker. Queries the RDAP system (which is authoritative
  * for "does this domain exist") and falls back to a DNS nameserver lookup for
- * TLDs without RDAP coverage. Availability only — no pricing.
+ * TLDs without RDAP coverage. Availability only - no pricing.
  *
  * RDAP semantics via rdap.org (redirects to the authoritative server):
  *   HTTP 404 -> domain not registered (available)
@@ -27,7 +27,7 @@ export class RdapChecker implements DomainChecker {
     if (rdap === "available") return { ...base, available: true };
     if (rdap === "taken") return { ...base, available: false };
 
-    // RDAP inconclusive — fall back to a DNS nameserver lookup.
+    // RDAP inconclusive - fall back to a DNS nameserver lookup.
     const dnsResult = await this.dnsHasRecords(clean);
     if (dnsResult === "taken") return { ...base, available: false };
     if (dnsResult === "available") return { ...base, available: true };

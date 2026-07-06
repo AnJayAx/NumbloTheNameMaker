@@ -2,7 +2,7 @@ import type { DomainResult } from "@/lib/types";
 import { DomainChecker, splitDomain } from "@/lib/domains/provider";
 
 /**
- * Deterministic fake checker for offline UI work — no network calls.
+ * Deterministic fake checker for offline UI work - no network calls.
  * Availability and price are derived from the domain string so results
  * are stable across runs.
  */

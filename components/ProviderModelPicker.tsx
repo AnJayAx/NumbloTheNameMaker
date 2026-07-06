@@ -6,9 +6,9 @@ import { modelAllowed, TIER_META, type AccountTier, type ModelCost } from "@/lib
 import type { LlmProvider } from "@/lib/types";
 
 /** Lowest tier that can run a model of this cost on the platform key. */
-const TIER_ORDER: AccountTier[] = ["guest", "friend", "tea", "sugar"];
+const TIER_ORDER: AccountTier[] = ["guest", "friend", "standard", "advanced"];
 function requiredTierName(cost: ModelCost): string {
-  const tier = TIER_ORDER.find((t) => modelAllowed(t, cost, false)) ?? "sugar";
+  const tier = TIER_ORDER.find((t) => modelAllowed(t, cost, false)) ?? "advanced";
   return TIER_META[tier].short;
 }
 
@@ -17,7 +17,7 @@ interface Props {
   model: string;
   /** Provider/model choice is only honored for logged-in tiers. */
   enabled: boolean;
-  /** Effective tier — gates premium models on the platform key. */
+  /** Effective tier - gates premium models on the platform key. */
   tier: AccountTier;
   /** Saved API keys per provider, used to show which providers stay unlocked. */
   apiKeys: Record<LlmProvider, string>;
@@ -103,7 +103,7 @@ export default function ProviderModelPicker({
           {!enabled
             ? "Guest generations use the platform's low-cost model. Log in to choose a provider and model."
             : needsKey
-              ? `🔒 Free names used up — add a ${selectedProvider.label} key in Settings to keep using it, or pick a provider you have a key for.`
+              ? `🔒 Free names used up - add a ${selectedProvider.label} key in Settings to keep using it, or pick a provider you have a key for.`
               : activeModel?.blurb}
         </p>
       </div>

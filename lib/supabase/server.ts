@@ -31,7 +31,7 @@ export async function getSupabaseServer(): Promise<SupabaseClient<Database> | nu
             cookieStore.set(name, value, options),
           );
         } catch {
-          // Called from a Server Component (read-only cookies) — the middleware
+          // Called from a Server Component (read-only cookies) - the middleware
           // refresh handles writing the session cookie, so this is safe to skip.
         }
       },

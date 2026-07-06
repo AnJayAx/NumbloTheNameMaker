@@ -1,28 +1,28 @@
-export type AccountTier = "guest" | "friend" | "tea" | "sugar";
+export type AccountTier = "guest" | "friend" | "standard" | "advanced";
 
-/** DB `profiles.plan` values (logged-in tiers only — guests have no profile). */
-export type PlanTier = "friend" | "tea" | "sugar";
-export const PLAN_TIERS: PlanTier[] = ["friend", "tea", "sugar"];
+/** DB `profiles.plan` values (logged-in tiers only - guests have no profile). */
+export type PlanTier = "friend" | "standard" | "advanced";
+export const PLAN_TIERS: PlanTier[] = ["friend", "standard", "advanced"];
 
 export type ModelCost = "low" | "medium" | "high";
 
 /**
- * Daily free-generation cap per tier — the single source of truth used by both
+ * Daily free-generation cap per tier - the single source of truth used by both
  * the client UI and the server-side quota enforcement.
  */
 export const FREE_LIMITS: Record<AccountTier, number> = {
   guest: 10,
   friend: 30,
-  tea: 100,
-  sugar: 500,
+  standard: 100,
+  advanced: 500,
 };
 
 /** Highest model cost a tier may run on the PLATFORM key (BYO key = always all). */
 const MAX_COST: Record<AccountTier, ModelCost> = {
   guest: "low",
   friend: "medium",
-  tea: "medium",
-  sugar: "high",
+  standard: "medium",
+  advanced: "high",
 };
 
 const COST_RANK: Record<ModelCost, number> = { low: 0, medium: 1, high: 2 };
@@ -73,7 +73,7 @@ export const TIER_META: Record<AccountTier, TierMeta> = {
       "History & favourites synced to your account",
     ],
   },
-  tea: {
+  standard: {
     label: "Standard",
     short: "Standard",
     price: "$4.99/mo",
@@ -86,7 +86,7 @@ export const TIER_META: Record<AccountTier, TierMeta> = {
       "Everything in Namblo's Friend",
     ],
   },
-  sugar: {
+  advanced: {
     label: "Advanced",
     short: "Advanced",
     price: "$49.99/mo",

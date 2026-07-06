@@ -2,7 +2,7 @@
   "name": "namblo-the-name-maker",
   "version": "0.1.0",
   "private": true,
-  "description": "Namblo — an AI agent that invents creative business names and checks domain availability.",
+  "description": "Namblo - an AI agent that invents creative business names and checks domain availability.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -21,7 +21,7 @@ export function setGuestCookie(response: NextResponse, guestId: string): void {
 type Admin = SupabaseClient<Database>;
 
 export interface ResolvedSubject {
-  /** "user:<uuid>" or "guest:<uuid>" — the key usage is counted against. */
+  /** "user:<uuid>" or "guest:<uuid>" - the key usage is counted against. */
   subject: string;
   /** Effective tier (guest, or the logged-in user's plan). */
   tier: AccountTier;
@@ -39,7 +39,7 @@ export interface ResolvedSubject {
 
 /** Map a DB `profiles.plan` value to a tier (defaults to friend for any account). */
 function planToTier(plan: unknown): AccountTier {
-  return plan === "sugar" ? "sugar" : plan === "tea" ? "tea" : "friend";
+  return plan === "advanced" ? "advanced" : plan === "standard" ? "standard" : "friend";
 }
 
 export interface QuotaSnapshot {
@@ -84,7 +84,7 @@ export async function resolveSubject(
         .eq("id", user.id)
         .maybeSingle();
       // A logged-in user with no profile row still resolves to the account
-      // default tier here, but bill-time updates would no-op — so heal the row.
+      // default tier here, but bill-time updates would no-op - so heal the row.
       if (!profile) await ensureProfile(admin, user);
       const tier = planToTier(profile?.plan);
       return {

@@ -33,7 +33,7 @@ export async function GET(request: Request) {
     if (resolved.guestIsNew && resolved.guestId) setGuestCookie(res, resolved.guestId);
     return res;
   } catch {
-    // Never let a quota read break the page — report unenforced.
+    // Never let a quota read break the page - report unenforced.
     return NextResponse.json({
       used: 0,
       limit: FREE_LIMITS.guest,

@@ -8,7 +8,7 @@ export interface SelectOption {
   label: string;
   /** Optional muted secondary text shown on the right (e.g. a cost/tier). */
   hint?: string;
-  /** Non-selectable (shown dimmed) — e.g. a model the tier can't use. */
+  /** Non-selectable (shown dimmed) - e.g. a model the tier can't use. */
   disabled?: boolean;
 }
 

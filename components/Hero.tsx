@@ -8,7 +8,7 @@ const COPY = {
     name: "Namblo",
     tail: "the name maker.",
     blurb:
-      "Describe your idea, pick a naming style, and Namblo invents a batch of brandable names — then checks every one against your favourite domains in real time.",
+      "Describe your idea, pick a naming style, and Namblo invents a batch of brandable names - then checks every one against your favourite domains in real time.",
   },
   nambly: {
     name: "Nambly",

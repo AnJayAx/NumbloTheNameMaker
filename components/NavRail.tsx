@@ -69,7 +69,7 @@ export default function NavRail({
 
   return (
     <>
-      {/* Desktop rail — logo pinned top, icons centred in the remaining space */}
+      {/* Desktop rail - logo pinned top, icons centred in the remaining space */}
       <nav className="fixed left-0 top-0 z-40 hidden h-full w-16 flex-col items-center md:flex">
         <Link href="/" aria-label="Namblo home" className="mt-4 shrink-0">
           <Image src="/logo.png" alt="Namblo" width={36} height={36} className="h-9 w-9 object-contain" priority />
@@ -268,7 +268,7 @@ function RailItem({
   );
 }
 
-/* — icons (stroke, monochrome) — */
+/* - icons (stroke, monochrome) - */
 
 function iconProps() {
   return {

@@ -3,7 +3,7 @@ import { AuthProvider } from "@/lib/useAuth";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Namblo · the Name Maker",
+  title: "Namblo",
   description:
     "Namblo is an AI agent that invents creative business names and checks domain availability in real time.",
 };

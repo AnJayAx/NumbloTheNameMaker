@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 
-export type PaidTier = "tea" | "sugar";
+export type PaidTier = "standard" | "advanced";
 
 let client: Stripe | null = null;
 
@@ -14,13 +14,15 @@ export function getStripe(): Stripe | null {
 
 /** Stripe Price id for a paid tier (from env). */
 export function priceForTier(tier: PaidTier): string | undefined {
-  return (tier === "tea" ? process.env.STRIPE_PRICE_TEA : process.env.STRIPE_PRICE_SUGAR)?.trim();
+  return (tier === "standard"
+    ? process.env.STRIPE_PRICE_STANDARD
+    : process.env.STRIPE_PRICE_ADVANCED)?.trim();
 }
 
 /** Reverse-map a Price id back to a tier (for webhook events). */
 export function tierForPrice(priceId: string | undefined | null): PaidTier | null {
   if (!priceId) return null;
-  if (priceId === process.env.STRIPE_PRICE_TEA?.trim()) return "tea";
-  if (priceId === process.env.STRIPE_PRICE_SUGAR?.trim()) return "sugar";
+  if (priceId === process.env.STRIPE_PRICE_STANDARD?.trim()) return "standard";
+  if (priceId === process.env.STRIPE_PRICE_ADVANCED?.trim()) return "advanced";
   return null;
 }

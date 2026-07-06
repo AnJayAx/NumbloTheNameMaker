@@ -179,11 +179,11 @@ export default function GeneratorForm({
             onClick={onRequestKey}
             className="btn-primary w-full text-sm"
           >
-            Free names used up — add an API key
+            Free names used up - add an API key
           </button>
           <p className="text-center text-xs leading-snug text-white/45">
             You&apos;ve used today&apos;s free names. Add your own API key to keep generating
-            without limits — your free names reset tomorrow.
+            without limits - your free names reset tomorrow.
           </p>
         </div>
       ) : (

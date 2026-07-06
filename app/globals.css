@@ -94,9 +94,9 @@ input:-webkit-autofill:active {
 @layer components {
   /*
    * Frosted panel with a gradient hairline border (brighter at the top edge)
-   * — the two-background padding-box/border-box trick over a blurred backdrop.
+   * - the two-background padding-box/border-box trick over a blurred backdrop.
    */
-  /* Flat card — a solid near-bg surface with a single hairline border. */
+  /* Flat card - a solid near-bg surface with a single hairline border. */
   .glass {
     position: relative;
     border-radius: 0.85rem;
@@ -118,7 +118,7 @@ input:-webkit-autofill:active {
     background: var(--surface);
   }
 
-  /* Monospace meta label (uppercase, tracked) — for eyebrows and section tags. */
+  /* Monospace meta label (uppercase, tracked) - for eyebrows and section tags. */
   .eyebrow {
     display: inline-flex;
     align-items: center;
@@ -138,7 +138,7 @@ input:-webkit-autofill:active {
     background: var(--text-subtle);
   }
 
-  /* Section label — matches the field labels inside the elements
+  /* Section label - matches the field labels inside the elements
      (text-sm / semibold / white-80). */
   .section-label {
     font-size: 0.875rem;
@@ -146,7 +146,7 @@ input:-webkit-autofill:active {
     color: rgba(255, 255, 255, 0.8);
   }
 
-  /* Nav rail icon button — grey, subtle hover. */
+  /* Nav rail icon button - grey, subtle hover. */
   .rail-btn {
     position: relative;
     display: flex;

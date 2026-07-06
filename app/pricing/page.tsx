@@ -4,7 +4,7 @@ import PricingCards from "@/components/PricingCards";
 
 export const metadata: Metadata = {
   title: "Pricing · Namblo",
-  description: "Namblo pricing — free tiers plus bring-your-own-key for unlimited naming.",
+  description: "Namblo pricing",
 };
 
 export default function PricingPage() {
@@ -17,7 +17,7 @@ export default function PricingPage() {
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-pretty text-base text-white/60 sm:text-lg">
           Start free. Bring your own AI key and Namblo never caps how many names you
-          generate — you only pay your provider for what you use.
+          generate, you only pay your provider for what you use.
         </p>
       </header>
 

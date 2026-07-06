@@ -11,7 +11,7 @@ export default function SubscriptionPage() {
   const { loading, user, session } = useAuth();
   const quota = useServerQuota(session?.access_token ?? null, user ? "friend" : "guest");
   const meta = TIER_META[quota.tier];
-  const hasSubscription = quota.tier === "tea" || quota.tier === "sugar";
+  const hasSubscription = quota.tier === "standard" || quota.tier === "advanced";
   const renewsAtLabel = quota.renewsAt
     ? new Date(quota.renewsAt).toLocaleDateString(undefined, {
         day: "numeric",
@@ -105,7 +105,7 @@ export default function SubscriptionPage() {
             Thank you<span className="neon-text">!</span>
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-pretty text-base text-white/60 sm:text-lg">
-            You&apos;re officially <span className="font-semibold text-white">{meta.label}</span> —
+            You&apos;re officially <span className="font-semibold text-white">{meta.label}</span>-
             Namblo appreciates you more than words. 💛
           </p>
         </header>
@@ -140,7 +140,7 @@ export default function SubscriptionPage() {
             ) : stalled ? (
               <div className="mt-6">
                 <p className="text-sm leading-snug text-white/55">
-                  Still processing your upgrade. If you just paid, it can take a moment to land —
+                  Still processing your upgrade. If you just paid, it can take a moment to land-
                   or the payment webhook may not be running yet.
                 </p>
                 <button
@@ -154,7 +154,7 @@ export default function SubscriptionPage() {
             ) : (
               <p className="mt-6 inline-flex items-center gap-2 text-sm text-white/55">
                 <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/20 border-t-white/70" />
-                Activating your plan — this can take a few seconds…
+                Activating your plan - this can take a few seconds…
               </p>
             )}
 
@@ -231,7 +231,7 @@ export default function SubscriptionPage() {
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
-              {quota.tier !== "sugar" && (
+              {quota.tier !== "advanced" && (
                 <Link href="/pricing" className="btn-primary text-sm">
                   Upgrade plan
                 </Link>

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const STEPS: Array<{ title: string; body: string }> = [
   {
     title: "Describe it",
-    body: "Tell Namblo about your business or project and pick a naming style — playful, affix, real words, portmanteau, or classical roots.",
+    body: "Tell Namblo about your business or project and pick a naming style - playful, affix, real words, portmanteau, or classical roots.",
   },
   {
     title: "Generate",
@@ -33,7 +33,7 @@ export default function AboutPage() {
         <p className="mx-auto mt-5 max-w-xl text-pretty text-base text-white/60 sm:text-lg">
           Namblo is an AI naming agent built for founders, makers, and side-project
           hoarders. It turns a short brief into a shortlist of brandable names whose
-          domains are still available — no more falling in love with a name that's taken.
+          domains are still available - no more falling in love with a name that's taken.
         </p>
       </header>
 

@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 
-/** Read `current_period_end` defensively — top-level on older API versions,
+/** Read `current_period_end` defensively - top-level on older API versions,
  *  on the subscription item from 2025-03-31.basil onward. */
 function periodEndIso(sub: Stripe.Subscription): string | null {
   const top = (sub as unknown as { current_period_end?: number }).current_period_end;
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     case "checkout.session.completed": {
       const s = event.data.object as Stripe.Checkout.Session;
       const tier = s.metadata?.tier;
-      if (s.metadata?.user_id && (tier === "tea" || tier === "sugar")) {
+      if (s.metadata?.user_id && (tier === "standard" || tier === "advanced")) {
         await patchProfile(
           { userId: s.metadata.user_id },
           {

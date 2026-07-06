@@ -64,7 +64,7 @@ export default function ResultCard({
             onClick={handleSave}
             aria-pressed={saved}
             aria-label={saved ? "Remove from saved" : "Save name"}
-            title={saved ? "Saved — click to remove" : "Save this name"}
+            title={saved ? "Saved - click to remove" : "Save this name"}
             className={[
               "rounded-lg border px-2 py-1 text-sm transition",
               saved

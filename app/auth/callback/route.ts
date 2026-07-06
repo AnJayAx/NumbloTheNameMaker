@@ -5,7 +5,7 @@ export const runtime = "nodejs";
 
 /**
  * OAuth / email-confirmation callback. Exchanges the `?code` for a session
- * (sets cookies), then redirects into the app — no token left in the URL.
+ * (sets cookies), then redirects into the app - no token left in the URL.
  */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);

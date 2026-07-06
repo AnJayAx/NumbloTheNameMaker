@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Sign in to subscribe." }, { status: 401 });
   }
 
-  // Guarantee the profile row exists before writing billing fields to it —
+  // Guarantee the profile row exists before writing billing fields to it-
   // otherwise the customer-id update below and the webhook's plan update both
   // silently no-op, and the user would pay without ever getting the plan.
   await ensureProfile(admin, user);
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   }
 
   const tier = body.tier;
-  if (tier !== "tea" && tier !== "sugar") {
+  if (tier !== "standard" && tier !== "advanced") {
     return NextResponse.json({ error: "Unknown plan." }, { status: 400 });
   }
   const price = priceForTier(tier);

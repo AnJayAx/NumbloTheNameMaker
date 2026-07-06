@@ -95,7 +95,7 @@ export async function POST(request: Request) {
   try {
     resolved = await resolveSubject(admin, request);
   } catch {
-    // If identity resolution fails, don't hard-block the user — fail open.
+    // If identity resolution fails, don't hard-block the user - fail open.
     resolved = {
       subject: "",
       tier: "guest",
@@ -125,7 +125,7 @@ export async function POST(request: Request) {
   if (!modelAllowed(resolved.tier, getModelCost(req.provider, model), false)) {
     return withGuestCookie(
       NextResponse.json(
-        { error: "That model needs the Sugar plan, or add your own API key.", quota: null },
+        { error: "That model needs the Advanced plan, or add your own API key.", quota: null },
         { status: 403 },
       ),
     );

@@ -2,7 +2,7 @@ import type { DomainResult } from "@/lib/types";
 import { DomainChecker, splitDomain } from "@/lib/domains/provider";
 
 /**
- * Namecheap adapter — availability + pricing. Drop-in for when credentials are
+ * Namecheap adapter - availability + pricing. Drop-in for when credentials are
  * ready. NOTE: Namecheap requires API access on your account (20+ domains OR
  * $50 balance OR $50+ spent) and the *server's* public IPv4 to be whitelisted.
  * Use the free sandbox (NAMECHEAP_SANDBOX=true) for development.

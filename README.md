@@ -1,9 +1,9 @@
 # Namblo, the Name Maker
 
-Namblo is an AI agent that invents creative, brandable business names — playful
+Namblo is an AI agent that invents creative, brandable business names - playful
 coinages (Google, Grok), affixed forms (Shopify, Smartify), repurposed real
 words (Amazon, Meta, Grab), portmanteaus (Netflix), and classical roots (Volvo)
-— then checks each idea's **domain availability and price** for the TLDs you
+-then checks each idea's **domain availability and price** for the TLDs you
 care about, in real time.
 
 Built with **Next.js (App Router) + TypeScript + Tailwind**, with a dark / LED
@@ -41,13 +41,13 @@ and OAuth / email-confirmation links land on `app/auth/callback` which exchanges
 `?code` for a session. Two required Supabase settings (Authentication → **URL
 Configuration**):
 
-- **Site URL**: `https://namblo.com` (the fallback redirect — if this is `localhost`,
+- **Site URL**: `https://namblo.com` (the fallback redirect - if this is `localhost`,
   logins on the live site bounce to localhost).
 - **Redirect URLs** allowlist: `https://namblo.com/**`, `https://www.namblo.com/**`,
   `http://localhost:3000/**`.
 
 For **email sign-up**, Authentication → **Providers → Email**: either turn **"Confirm
-email" off** (users sign in immediately after sign-up — simplest) or keep it on and
+email" off** (users sign in immediately after sign-up - simplest) or keep it on and
 configure **custom SMTP** (Supabase's built-in email is rate-limited and unreliable).
 The Google OAuth client's authorized redirect URI stays the Supabase callback
 (`https://<project-ref>.supabase.co/auth/v1/callback`).
@@ -61,31 +61,31 @@ Four tiers, enforced **server-side** in `app/api/generate` and counted in
 |---|---|---|---|---|
 | `guest` (logged out) | Free Loader | Free | 10 | cheap default only |
 | `friend` | Namblo's Friend | Free | 30 | low + medium |
-| `tea` | Standard | $4.99/mo | 100 | low + medium |
-| `sugar` | Advanced | $49.99/mo | 500 | all (incl. premium) |
+| `standard` | Standard | $4.99/mo | 100 | low + medium |
+| `advanced` | Advanced | $49.99/mo | 500 | all (incl. premium) |
 
-The tier is **server-authoritative** — for a logged-in user it comes from
+The tier is **server-authoritative** - for a logged-in user it comes from
 `profiles.plan` (surfaced via `/api/quota`), not any client toggle. Guests are
 tracked by an httpOnly cookie (best-effort). **Bringing your own provider API key**
 bypasses both the quota and the model gating (you pay your provider). Premium
-(`high`-cost) models on the *platform* key are Sugar-only, enforced in the picker
+(`high`-cost) models on the *platform* key are Advanced-only, enforced in the picker
 and re-checked in the generate route (403 otherwise). Without
 `SUPABASE_SERVICE_ROLE_KEY`, enforcement is disabled and the app shows the tier
 limit uncapped.
 
 To grant a tier before billing exists, set the row directly:
-`update public.profiles set plan = 'tea' where id = '<user-uuid>';`
+`update public.profiles set plan = 'standard' where id = '<user-uuid>';`
 
 ### Payments (Stripe)
 
-Billing for the Tea / Sugar tiers is wired up (`app/api/stripe/` +
+Billing for the Standard / Advanced tiers is wired up (`app/api/stripe/` +
 [lib/stripe.ts](lib/stripe.ts)). It stays dormant until you set the env vars.
 Requires `SUPABASE_SERVICE_ROLE_KEY` (the webhook writes `profiles.plan`).
 
 **Setup:**
 
-1. **Stripe dashboard** (test mode first): create two recurring Products/Prices —
-   Tea `$4.99/mo`, Sugar `$49.99/mo`; copy their `price_...` IDs. Enable the
+1. **Stripe dashboard** (test mode first): create two recurring Products/Prices-
+   Standard `$4.99/mo`, Advanced `$49.99/mo`; copy their `price_...` IDs. Enable the
    **Customer Portal** (Settings → Billing → Customer portal) and allow plan
    switching between the two prices.
 2. **Run migration** `supabase/migrations/0005_stripe.sql`.
@@ -93,8 +93,8 @@ Requires `SUPABASE_SERVICE_ROLE_KEY` (the webhook writes `profiles.plan`).
    ```bash
    STRIPE_SECRET_KEY=sk_test_...
    STRIPE_WEBHOOK_SECRET=whsec_...
-   STRIPE_PRICE_TEA=price_...
-   STRIPE_PRICE_SUGAR=price_...
+   STRIPE_PRICE_STANDARD=price_...
+   STRIPE_PRICE_ADVANCED=price_...
    ```
 4. **Webhook endpoint** → `POST /api/stripe/webhook`, subscribed to
    `checkout.session.completed`, `customer.subscription.created/updated/deleted`.
@@ -115,7 +115,7 @@ each user to their own row.
 
 Out of the box it's configured for **Claude** (names) + **RDAP** (free
 availability checks). With no keys at all you can still explore the UI by
-setting `DOMAIN_PROVIDER=mock` and using the mock data — though name generation
+setting `DOMAIN_PROVIDER=mock` and using the mock data - though name generation
 needs a real AI key.
 
 ---
@@ -128,10 +128,10 @@ Browser (dark/LED UI)
   └─ POST /api/check    → Domain provider → DomainResult[]  (pills fill in after)
 ```
 
-- `app/api/*` — server-only route handlers; **API keys never reach the client**.
-- `lib/llm/*` — `NameGenerator` interface + Claude / OpenAI / Gemini adapters + the per-mode prompts.
-- `lib/domains/*` — `DomainChecker` interface + RDAP / Namecheap / Mock adapters.
-- `components/*`, `app/page.tsx` — the UI and the two-phase flow.
+- `app/api/*` - server-only route handlers; **API keys never reach the client**.
+- `lib/llm/*` - `NameGenerator` interface + Claude / OpenAI / Gemini adapters + the per-mode prompts.
+- `lib/domains/*` - `DomainChecker` interface + RDAP / Namecheap / Mock adapters.
+- `components/*`, `app/page.tsx` - the UI and the two-phase flow.
 
 ### Saving names
 
@@ -149,12 +149,12 @@ to `/api/check` with the Porkbun provider.
 
 ### Generation modes
 
-1. **Playful / Invented** — coined words (Google, Grok, Zapier)
-2. **Affix** — root + prefix/suffix (Shopify, Smartify, Calendly)
-3. **Real Words** — repurposed everyday words (Amazon, Meta, Grab)
-4. **Portmanteau** — blended words (Netflix, Pinterest)
-5. **Classical Roots** — Latin/Greek/foreign roots (Volvo, Asana, Vimeo)
-6. **Freeform** — describe exactly what you want
+1. **Playful / Invented** - coined words (Google, Grok, Zapier)
+2. **Affix** - root + prefix/suffix (Shopify, Smartify, Calendly)
+3. **Real Words** - repurposed everyday words (Amazon, Meta, Grab)
+4. **Portmanteau** - blended words (Netflix, Pinterest)
+5. **Classical Roots** - Latin/Greek/foreign roots (Volvo, Asana, Vimeo)
+6. **Freeform** - describe exactly what you want
 
 In Affix mode, add an optional name pattern to constrain the shape of results:
 `pipe-` starts every name with "pipe", `-pipe` ends every name with "pipe", and
@@ -173,7 +173,7 @@ Set `LLM_PROVIDER` to `claude`, `openai`, or `gemini`.
 | `openai` | `OPENAI_API_KEY`, `OPENAI_MODEL` | `npm i openai` |
 | `gemini` | `GEMINI_API_KEY`, `GEMINI_MODEL` | `npm i @google/genai` |
 
-The OpenAI and Gemini SDKs load lazily, so the default install stays lean — you
+The OpenAI and Gemini SDKs load lazily, so the default install stays lean - you
 only install them if you switch. Model IDs default to `claude-sonnet-4-6`,
 `gpt-5.5`, and `gemini-3.1-pro-preview` and are overridable via env (handy as
 those last two evolve).
@@ -187,21 +187,21 @@ in `getNameGenerator()`.
 
 Set `DOMAIN_PROVIDER` to `rdap`, `namecheap`, or `mock`.
 
-- **`rdap`** (default) — free, no account. Authoritative availability via the
+- **`rdap`** (default) - free, no account. Authoritative availability via the
   RDAP system with a DNS fallback for TLDs without RDAP coverage. **Availability
-  only — no pricing.**
-- **`mock`** — deterministic fake data; great for offline UI work.
-- **`namecheap`** — availability **and** price. See constraints below.
+  only - no pricing.**
+- **`mock`** - deterministic fake data; great for offline UI work.
+- **`namecheap`** - availability **and** price. See constraints below.
 
 ### Namecheap setup & constraints
 
-Namecheap's API has real prerequisites — read these before switching:
+Namecheap's API has real prerequisites - read these before switching:
 
 1. **API access** must be enabled on your account, which requires one of:
    20+ domains, **or** $50+ account balance, **or** $50+ spent.
-2. **IP whitelisting** — the *server's* public IPv4 must be whitelisted in your
+2. **IP whitelisting** - the *server's* public IPv4 must be whitelisted in your
    Namecheap API settings. A deployed app therefore needs a **static IP**.
-3. **Sandbox** — develop against `sandbox.namecheap.com` for free. Set
+3. **Sandbox** - develop against `sandbox.namecheap.com` for free. Set
    `NAMECHEAP_SANDBOX=true` (the default).
 
 Then set:
@@ -226,7 +226,7 @@ fails.
 
 - **UI only, no keys:** `DOMAIN_PROVIDER=mock` + any AI key → full flow with fake prices.
 - **Real availability:** `ANTHROPIC_API_KEY` set + `DOMAIN_PROVIDER=rdap` → generate names; a known-taken domain (e.g. `google.com`) shows taken, a coinage shows available.
-- **Swap test:** change `LLM_PROVIDER` / `DOMAIN_PROVIDER` and restart — no code change needed.
+- **Swap test:** change `LLM_PROVIDER` / `DOMAIN_PROVIDER` and restart - no code change needed.
 - `npm run build` should pass with clean types.
 
 ---

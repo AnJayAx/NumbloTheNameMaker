@@ -113,7 +113,7 @@ export default function Home() {
   // only used when enforcement is disabled (no service role configured).
   const quota = useServerQuota(session?.access_token ?? null, user ? "friend" : "guest");
   const activeTier = quota.tier;
-  // A saved key only counts for the currently selected provider — an Anthropic
+  // A saved key only counts for the currently selected provider - an Anthropic
   // key does not unlock Gemini/GPT.
   const hasKeyForProvider =
     activeTier !== "guest" && aiSettings.selectedApiKey.trim() !== "";
@@ -297,7 +297,7 @@ export default function Home() {
         });
         const generateData = await generateRes.json();
         throwIfAborted(signal);
-        // The server is authoritative on quota — mirror it into the badge.
+        // The server is authoritative on quota - mirror it into the badge.
         if (generateData.quota) {
           quota.apply(generateData.quota);
           if (!usingOwnApiKey) remainingQuota = generateData.quota.remaining;
@@ -658,7 +658,7 @@ function ProductSwitch({
   product: Product;
   onChange: (product: Product) => void;
 }) {
-  // `sliding` is true only while the pill is travelling — during that window
+  // `sliding` is true only while the pill is travelling - during that window
   // both labels go white (legible over the dark track and the moving pill),
   // and the pill plays a squash/stretch so it flows like a water drop.
   const [sliding, setSliding] = useState(false);
@@ -672,7 +672,7 @@ function ProductSwitch({
 
   return (
     <div className="relative mx-auto grid max-w-sm grid-cols-2 rounded-full border border-white/10 bg-white/[0.03] p-1 shadow-led-card backdrop-blur-xl">
-      {/* Pill layer — sits behind the labels so text is never covered. */}
+      {/* Pill layer - sits behind the labels so text is never covered. */}
       <div aria-hidden className="pointer-events-none absolute inset-1">
         <div
           className="absolute inset-y-0 left-0 w-1/2 transition-transform duration-[520ms] ease-[cubic-bezier(0.65,0,0.35,1)]"

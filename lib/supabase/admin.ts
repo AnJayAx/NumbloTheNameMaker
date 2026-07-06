@@ -6,7 +6,7 @@ let adminClient: SupabaseClient<Database> | null = null;
 /**
  * Service-role Supabase client for server-only use (API routes). Bypasses RLS,
  * so it must never be imported into client code. Returns `null` when the
- * service-role key isn't configured — callers should treat that as
+ * service-role key isn't configured - callers should treat that as
  * "enforcement disabled" and fail open, so local/dev without the secret still
  * works.
  */
@@ -31,7 +31,7 @@ export function getSupabaseAdmin(): SupabaseClient<Database> | null {
 /**
  * Best-effort: guarantee a signed-in user has a `profiles` row. The DB trigger
  * seeds one at sign-up, but users created before the trigger existed (early
- * OAuth sign-ins, admin-API users) can be missing it — and billing writes
+ * OAuth sign-ins, admin-API users) can be missing it - and billing writes
  * (checkout + webhook) silently no-op without a row, so a paid plan can never
  * land. Keyed on the user id so it never overwrites an existing profile; safe
  * to call on every authenticated request.

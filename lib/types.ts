@@ -54,7 +54,7 @@ export const MODES: ModeMeta[] = [
   {
     id: "freeform",
     label: "Freeform",
-    blurb: "Describe exactly what you want — Namblo figures out the style.",
+    blurb: "Describe exactly what you want - Namblo figures out the style.",
     examples: ["“calm, one-syllable, for a meditation app”"],
   },
 ];

@@ -7,14 +7,14 @@ import { useAuth } from "@/lib/useAuth";
 import { useServerQuota } from "@/lib/useServerQuota";
 
 const FREE_TIERS: AccountTier[] = ["guest", "friend"];
-const PREMIUM_TIERS: AccountTier[] = ["tea", "sugar"];
-const RANK: Record<AccountTier, number> = { guest: 0, friend: 1, tea: 2, sugar: 3 };
+const PREMIUM_TIERS: AccountTier[] = ["standard", "advanced"];
+const RANK: Record<AccountTier, number> = { guest: 0, friend: 1, standard: 2, advanced: 3 };
 
 interface Cta {
   label: string;
   kind: "link" | "checkout" | "portal" | "current" | "none";
   href?: string;
-  tier?: "tea" | "sugar";
+  tier?: "standard" | "advanced";
   variant?: "primary" | "ghost";
 }
 
@@ -26,9 +26,9 @@ function ctaFor(tier: AccountTier, current: AccountTier, loggedIn: boolean): Cta
         return { label: "Start naming", kind: "link", href: "/", variant: "ghost" };
       case "friend":
         return { label: "Log in", kind: "link", href: "/?panel=account", variant: "primary" };
-      case "tea":
+      case "standard":
         return { label: "Subscribe", kind: "link", href: "/?panel=account", variant: "primary" };
-      case "sugar":
+      case "advanced":
         return { label: "Subscribe", kind: "link", href: "/?panel=account", variant: "primary" };
     }
   }
@@ -41,11 +41,11 @@ function ctaFor(tier: AccountTier, current: AccountTier, loggedIn: boolean): Cta
   const up = RANK[tier] > RANK[current];
   // Already subscribed → all plan changes go through the billing portal;
   // otherwise (currently free) start a fresh checkout for the chosen tier.
-  const hasPaidSub = current === "tea" || current === "sugar";
+  const hasPaidSub = current === "standard" || current === "advanced";
   if (hasPaidSub) {
     return { label: up ? "Upgrade" : "Downgrade", kind: "portal", variant: up ? "primary" : "ghost" };
   }
-  return { label: "Upgrade", kind: "checkout", tier: tier as "tea" | "sugar", variant: "primary" };
+  return { label: "Upgrade", kind: "checkout", tier: tier as "standard" | "advanced", variant: "primary" };
 }
 
 export default function PricingCards() {
